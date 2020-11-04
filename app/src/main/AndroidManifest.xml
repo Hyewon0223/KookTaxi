@@ -17,15 +17,15 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAOXI92i2E2noR0RzUTNK2hARgVYt7GQrA" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".LoginActivity"/>
+        <activity android:name=".JoinActivity" />
+        <activity android:name=".MainActivity"/>
         <activity android:name=".SearchActivity"/>
         <activity android:name=".ChatActivity"/>
 

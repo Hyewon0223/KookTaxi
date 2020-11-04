@@ -24,8 +24,8 @@
         android:layout_marginTop="35dp"
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
-        android:layout_toRightOf="@id/IDjoinText"
-        android:phoneNumber="true" />
+        android:hint=""
+        android:layout_toRightOf="@id/IDjoinText" />
 
     <TextView
         android:id="@+id/pwjoinText"
@@ -49,6 +49,7 @@
         android:layout_marginRight="20dp"
         android:layout_toRightOf="@id/pwjoinText"
         android:ems="10"
+        android:hint=""
         android:inputType="textPassword" />
 
     <TextView
@@ -71,6 +72,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
+        android:hint=""
         android:layout_toRightOf="@id/dpjoinText" />
 
     <TextView
@@ -93,7 +95,9 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
-        android:layout_toRightOf="@id/emailjoinText" />
+        android:layout_toRightOf="@id/emailjoinText"
+        android:hint=""
+        android:inputType="textEmailAddress" />
 
     <TextView
         android:id="@+id/phonejoinText"
@@ -116,6 +120,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
         android:layout_toRightOf="@id/phonejoinText"
+        android:hint=""
         android:phoneNumber="true" />
 
     <TextView
@@ -129,6 +134,7 @@
         android:text="Gender" />
 
     <RadioGroup
+        android:id="@+id/RadioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/phonejoinEdit"
@@ -139,13 +145,13 @@
         android:orientation="horizontal">
 
         <RadioButton
-            android:id="@+id/radioButton"
+            android:id="@+id/maleButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Male" />
 
         <RadioButton
-            android:id="@+id/radioButton2"
+            android:id="@+id/femaleButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -172,6 +178,14 @@
         android:layout_marginTop="43dp"
         android:layout_toRightOf="@id/check"
         android:text="개인 정보 보호 동의?" />
+
+    <TextView
+        android:id="@+id/alarmText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/joinButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp" />
 
     <Button
         android:id="@+id/joinButton"

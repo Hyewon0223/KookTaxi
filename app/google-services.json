@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "297997739256",
+    "firebase_url": "https://kooktaxi-c6d71.firebaseio.com",
+    "project_id": "kooktaxi-c6d71",
+    "storage_bucket": "kooktaxi-c6d71.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:297997739256:android:019f12dd04c3fb41b6870d",
+        "android_client_info": {
+          "package_name": "com.example.kooktaxi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "297997739256-gcaa1qlhgui93gd8j2as15sqfq7mad6e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlDX2F0JAzgr374NT0LLyaWjYU1eLOsOA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "297997739256-gcaa1qlhgui93gd8j2as15sqfq7mad6e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

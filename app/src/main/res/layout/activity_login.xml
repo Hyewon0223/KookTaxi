@@ -15,17 +15,17 @@
         app:srcCompat="@android:drawable/sym_def_app_icon" />
 
     <TextView
-        android:id="@+id/IDtextView"
+        android:id="@+id/mailTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/LogoimageView"
-        android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
+        android:layout_marginStart="85dp"
+        android:layout_marginLeft="85dp"
         android:layout_marginTop="65dp"
-        android:text="ID" />
+        android:text="Email" />
 
     <EditText
-        android:id="@+id/IDEditText"
+        android:id="@+id/mailEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/LogoimageView"
@@ -34,24 +34,24 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="100dp"
         android:layout_marginRight="100dp"
-        android:layout_toRightOf="@id/IDtextView"
-        android:phoneNumber="true" />
+        android:layout_toRightOf="@id/mailTextView"
+        android:inputType="textEmailAddress" />
 
     <TextView
         android:id="@+id/PwtextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/IDtextView"
+        android:layout_below="@id/mailTextView"
         android:layout_marginStart="70dp"
         android:layout_marginLeft="70dp"
         android:layout_marginTop="50dp"
         android:text="Password" />
 
     <EditText
-        android:id="@+id/TextPassword"
+        android:id="@+id/pwEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/IDEditText"
+        android:layout_below="@id/mailEditText"
         android:layout_marginStart="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="30dp"
@@ -81,5 +81,13 @@
         android:layout_marginBottom="20dp"
         android:layout_toRightOf="@id/Loginbutton"
         android:text="Join" />
+
+    <TextView
+        android:id="@+id/alarmTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/Loginbutton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp" />
 
 </RelativeLayout>
