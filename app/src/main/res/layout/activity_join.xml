@@ -17,15 +17,15 @@
 
     <EditText
         android:id="@+id/IDjoinEdit"
-        android:layout_width="match_parent"
+        android:layout_width="285dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="47dp"
         android:layout_marginLeft="47dp"
         android:layout_marginTop="35dp"
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
-        android:hint=""
-        android:layout_toRightOf="@id/IDjoinText" />
+        android:layout_toRightOf="@id/IDjoinText"
+        android:hint="" />
 
     <TextView
         android:id="@+id/pwjoinText"
@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/IDjoinEdit"
         android:layout_marginStart="22dp"
-        android:layout_marginLeft="22dp"
+        android:layout_marginLeft="23dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
@@ -56,7 +56,7 @@
         android:id="@+id/dpjoinText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/pwjoinText"
+        android:layout_below="@id/pwjoinCheckText"
         android:layout_marginStart="15dp"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="35dp"
@@ -66,14 +66,14 @@
         android:id="@+id/dpjoinEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/PwjoinEdit"
+        android:layout_below="@+id/pwjoinCheckEdit"
         android:layout_marginStart="18dp"
         android:layout_marginLeft="18dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
-        android:hint=""
-        android:layout_toRightOf="@id/dpjoinText" />
+        android:layout_toRightOf="@id/dpjoinText"
+        android:hint="" />
 
     <TextView
         android:id="@+id/emailjoinText"
@@ -198,6 +198,27 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
         android:text="Join" />
+
+    <EditText
+        android:id="@+id/pwjoinCheckEdit"
+        android:layout_width="284dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/PwjoinEdit"
+        android:layout_marginStart="3dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/pwjoinCheckText"
+        android:layout_toRightOf="@+id/pwjoinCheckText"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:id="@+id/pwjoinCheckText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pwjoinText"
+        android:layout_marginTop="35dp"
+        android:text="CheckPassWord" />
 
 
 </RelativeLayout>
