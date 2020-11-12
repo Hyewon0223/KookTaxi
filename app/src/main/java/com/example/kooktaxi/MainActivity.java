@@ -1,3 +1,7 @@
+/*
+파일명: MainActivity.java
+개발자 이름: 백연선, 이한정
+ */
 package com.example.kooktaxi;
 
 import android.Manifest;
@@ -23,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.kooktaxi.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -49,15 +54,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker currentMarker = null;
 
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
-    private static final int UPDATE_INTERVAL_MS = 1000;  // 1초
-    private static final int FASTEST_UPDATE_INTERVAL_MS = 500; // 0.5초
-    private static final int PERMISSIONS_REQUEST_CODE = 100;
-    boolean needRequest = false;
+    private static final int UPDATE_INTERVAL_MS = 1000;  //1초
+    private static final int FASTEST_UPDATE_INTERVAL_MS = 500; //0.5초
+    private static final int PERMISSIONS_REQUEST_CODE = 100; //onRequestPermissionsResult에서 수신된 결과에서 ActivityCompat.requestPermissions를 사용한 퍼미션 요청을 구별하기 위해 사용됨.
+    boolean needRequest = false; //위와 동일
 
-    String[] REQUIRED_PERMISSIONS  = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION };  // 외부 저장소
+    String[] REQUIRED_PERMISSIONS  = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION };  //앱을 실행하기 위해 필요한 퍼미션을 정의
 
     Location mCurrentLocatiion;
     LatLng currentPosition;
+
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest locationRequest;
     private Location location;
@@ -80,8 +86,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.addLocationRequest(locationRequest);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);  //레이아웃의 프래그먼트의 핸들을 가져옴
+        mapFragment.getMapAsync(this);  //호출되면 onMapReady 콜백이 실행됨
 
         // 버튼 페이지 연결
         Button button = (Button) findViewById(R.id.btn_gil);
@@ -95,35 +101,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onMapReady(final GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {  //map이 사용할 준비가 되었을 때(GoogleMap 객체를 파라미터로 제공할 수 있을 때) 호출되는 메소드
         mMap = googleMap;
-        setDefaultLocation();
+        setDefaultLocation();  //초기위치 서울로 이동
 
+        // 위치 퍼미션을 가지고 있는지 확인
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED && hasCoarseLocationPermission == PackageManager.PERMISSION_GRANTED) {
-            startLocationUpdates();
-        } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])) {
-                Snackbar.make(mLayout, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
+        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED && hasCoarseLocationPermission == PackageManager.PERMISSION_GRANTED) {  //퍼미션을 가지고 있으면
+            startLocationUpdates();  //위치 업데이트 시작
+        } else {  //퍼미션 요청을 허용한 적 없다면
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])) {  //사용자가 퍼미션을 거부한 적 있는 경우에는
+                Snackbar.make(mLayout, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {  //snackbar(이유를 보여주고, 사용자가 확인을 클릭을 해야 사라짐)로 허용을 요청함. 요청 결과는 onRequestPermissionResult에서 수신.
                     @Override
                     public void onClick(View view) {
                         ActivityCompat.requestPermissions( MainActivity.this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);
                     }
                 }).show();
-            } else {
-                ActivityCompat.requestPermissions( this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);
+            } else {  //사용자가 퍼미션 거부를 한 적 없으면
+                ActivityCompat.requestPermissions( this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);  //바로 퍼미션 요청을 함
             }
         }
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-        LatLng Gwanghwamun = new LatLng(37.5707456,126.973708);
+        //좌표 객체 생성(우선 4개의 역 좌표 객체를 생성함)
+        LatLng Gwanghwamun = new LatLng(37.5707456,126.973708); //(위도, 경도)
         LatLng Hongdae = new LatLng(37.557527,126.9222782);
         LatLng Gileum = new LatLng(37.6086541,127.0136683);
         LatLng DDP = new LatLng(37.5644,127.0055713);
 
-        MarkerOptions[] markerOptions = new MarkerOptions[4];
+        MarkerOptions[] markerOptions = new MarkerOptions[4];  //마커옵션 배열 생성. 각 마커의 위치와 타이틀을 설정해줌.
         markerOptions[0] = new MarkerOptions()
                 .position(Gwanghwamun)
                 .title("광화문역");
@@ -138,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .title("동대문역사문화공원역");
 
         for(int i=0; i<4; i++){
-            mMap.addMarker(markerOptions[i]);
+            mMap.addMarker(markerOptions[i]);  //addMarker()를 통해 GoogleMap객체(mMap)에 추가하면 지도에 표시된다.
         }
     }
 
@@ -160,8 +168,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
 
     private void startLocationUpdates() {
-        if (!checkLocationServicesStatus()) {
-            showDialogForLocationServiceSetting();
+        if (!checkLocationServicesStatus()) {  //위치설정이 되지 않았으면
+            showDialogForLocationServiceSetting();  //위치설정을 한다
         } else {
             int hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
             int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -239,8 +247,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(cameraUpdate);
     }
 
-    public void setDefaultLocation() {
-        LatLng DEFAULT_LOCATION = new LatLng(37.52487, 126.92723);
+    public void setDefaultLocation() {  //Default MarkerOptions를 설정해주는 함수
+        LatLng DEFAULT_LOCATION = new LatLng(37.52487, 126.92723);  //첫 위치를 서울(여의도 부근)으로 설정
         String markerTitle = "위치정보 가져올 수 없음";
         String markerSnippet = "위치 퍼미션과 GPS 활성 요부 확인하세요";
 
@@ -254,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         currentMarker = mMap.addMarker(markerOptions);
 
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15);  //두번째 인자(15)는 카메라 줌의 정도를 나타냄
         mMap.moveCamera(cameraUpdate);
     }
 
