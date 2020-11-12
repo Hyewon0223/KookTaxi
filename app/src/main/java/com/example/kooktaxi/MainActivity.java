@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
-
     private GoogleMap mMap;
     private Marker currentMarker = null;
 
