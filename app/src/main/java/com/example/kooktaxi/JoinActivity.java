@@ -140,29 +140,3 @@ public class JoinActivity extends AppCompatActivity {
     }
 
 }
-
-
-//https://gist.github.com/rlarla245
-//- Firebase 이메일 주소 유효 확인
-//// 이메일을 체크하는 메소드입니다.
-//        fun sendEmailVerification() {
-//        FirebaseAuth.getInstance().currentUser!!.sendEmailVerification().addOnCompleteListener { task ->
-//        if (task.isSuccessful) {
-//        Toast("확인 메일을 전송했습니다.")
-//        } else {
-//        Toast(task.exception)
-//        }
-//        }
-//        }
-//
-//        1. 체크 버튼에 해당 메소드를 실행시킵니다.
-//        2. 이메일 내용을 수정해봅시다. 콘솔로 이동합니다.
-//        3. Authentication -> 템플릿 -> 이메일 주소 인증 탭 -> 수정 이모티콘(펜) 누르기 -> 제목 및 기타 텍스트 변경
-//        *이메일 메시지는 수정할 수 없습니다. 템플릿 언어는 바꿔줍시다.
-//        4. 이메일 인증이 완료되면 새로운 기능을 활성화 시켜야 겠죠? 테스트로 인증 버튼을 없애겠습니다. 메소드 코드를 수정합니다.
-//// 메소드 상단에 입력합니다. true - 인증됨, false - 인증 안됨
-//        if (FirebaseAuth.getInstance().currentUser!!.isEmailVerified) {
-//        Toast("인증되었습니다.")
-//        buttonEmailVerification.Enabled(true) -> 맞는지 확인 필요
-//        return
-//        }

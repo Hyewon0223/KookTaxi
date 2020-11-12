@@ -63,6 +63,27 @@
         android:text="Department" />
 
     <EditText
+        android:id="@+id/pwjoinCheckEdit"
+        android:layout_width="284dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/PwjoinEdit"
+        android:layout_marginStart="3dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/pwjoinCheckText"
+        android:layout_toRightOf="@+id/pwjoinCheckText"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:id="@+id/pwjoinCheckText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pwjoinText"
+        android:layout_marginTop="35dp"
+        android:text="CheckPassWord" />
+
+    <EditText
         android:id="@+id/dpjoinEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -120,8 +141,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
         android:layout_toRightOf="@id/phonejoinText"
-        android:hint=""
-        android:phoneNumber="true" />
+        android:hint=""/>
 
     <TextView
         android:id="@+id/genderJoinText"
@@ -177,7 +197,7 @@
         android:layout_alignParentBottom="false"
         android:layout_marginTop="43dp"
         android:layout_toRightOf="@id/check"
-        android:text="개인 정보 보호 동의?" />
+        android:text="개인 정보 보호 동의" />
 
     <TextView
         android:id="@+id/alarmText"
@@ -198,27 +218,5 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
         android:text="Join" />
-
-    <EditText
-        android:id="@+id/pwjoinCheckEdit"
-        android:layout_width="284dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/PwjoinEdit"
-        android:layout_marginStart="3dp"
-        android:layout_marginLeft="3dp"
-        android:layout_marginTop="10dp"
-        android:layout_toEndOf="@+id/pwjoinCheckText"
-        android:layout_toRightOf="@+id/pwjoinCheckText"
-        android:ems="10"
-        android:inputType="textPassword" />
-
-    <TextView
-        android:id="@+id/pwjoinCheckText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/pwjoinText"
-        android:layout_marginTop="35dp"
-        android:text="CheckPassWord" />
-
 
 </RelativeLayout>

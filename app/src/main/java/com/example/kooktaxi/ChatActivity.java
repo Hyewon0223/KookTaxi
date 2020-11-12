@@ -48,10 +48,10 @@ public class ChatActivity extends AppCompatActivity {
         btn_send = (Button) findViewById(R.id.btn_send);
 
         str_room_name = getIntent().getExtras().get("room_name").toString();
-        str_user_name = getIntent().getExtras().get("user_name").toString();
+//        str_user_name = getIntent().getExtras().get("user_name").toString();
         reference = FirebaseDatabase.getInstance().getReference().child(str_room_name);
 
-        setTitle(str_room_name + "채팅방");
+        setTitle(str_room_name + " 채팅방");
 
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);
         lv_chating.setAdapter(arrayAdapter);
@@ -68,9 +68,9 @@ public class ChatActivity extends AppCompatActivity {
 
                 DatabaseReference root = reference.child(key);
 
-                //updateChildredn를 호출하여 database 최종 업데이트
+                //updateChildren를 호출하여 database 최종 업데이트
                 Map<String, Object> objectMap = new HashMap<String, Object>();
-                objectMap.put("name", str_user_name);
+//                objectMap.put("name", str_user_name);
                 objectMap.put("message", et_send.getText().toString());
 
                 root.updateChildren(objectMap);
