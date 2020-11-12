@@ -35,7 +35,6 @@ public class JoinActivity extends AppCompatActivity {
     public String dp = "";
     public String phone = "";
     public String gender = "";
-    public boolean IDCheck = false;
 
     String[] info = {Id, mail, pw, dp, phone};
     String[] alarm = {"ID ", "Email ", "Password ", "Department ", "Phone Number "};
@@ -91,7 +90,7 @@ public class JoinActivity extends AppCompatActivity {
                 for (int i = 0; i < info.length; i++)
                     if (info[i] == "") edits[i].setHint(alarm[i] + "was not filled."); //공란
 
-                if (IDCheck && mailCheck[1].equals("kookmin.ac.kr") && pw.equals(pwCheck) && Check.isChecked() && gender != "") {
+                if (mailCheck[1].equals("kookmin.ac.kr") && pw.equals(pwCheck) && Check.isChecked() && gender != "") {
                     if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0) {
                         firebaseAuth.createUserWithEmailAndPassword(mail,pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
@@ -117,8 +116,7 @@ public class JoinActivity extends AppCompatActivity {
                             if (info[i] == "") edits[i].setHint(alarm[i] + "was not filled.");
                     }
                 }
-
-                else if (!IDCheck) alarmtext.setText("Click the IDCheck Button.");
+                
                 else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
                 else if (!mailCheck.equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
                 else if (gender == "") alarmtext.setText("Please check the gender.");
