@@ -1,3 +1,7 @@
+/*
+파일명: JoinActivity.java
+개발자 이름: 조나영, 최혜원
+ */
 package com.example.kooktaxi;
 
 import androidx.annotation.NonNull;
@@ -68,13 +72,16 @@ public class JoinActivity extends AppCompatActivity {
 
         Button joinButton = (Button) findViewById(R.id.joinButton);
 
+        // Firebase 설정
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
         firebaseAuth = FirebaseAuth.getInstance();
 
+        // joinButton을 클릭했을 때
         joinButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // 모든 입력 값들을 String으로 각각의 변수에 저장
                 Id = IDEdit.getText().toString();
                 mail = mailEdit.getText().toString();
                 pw = pwEdit.getText().toString();
@@ -82,20 +89,27 @@ public class JoinActivity extends AppCompatActivity {
                 dp = dpEdit.getText().toString();
                 phone = phoneEdit.getText().toString();
 
+                // mail = "123456@kookmin.ac.kr
+                // mailCheck 배열에 '@'를 기준으로 분리해 저장
                 String mailCheck[] = mail.split("@");
 
+                //password 양식에 적합한지 검사
                 for (int i = 1; i < 2; i++)
                     if (!PASSWORD_PATTERN.matcher(info[i]).matches()) edits[i].setHint("Please adjust the format.");
 
+                //빈 칸이 있는지 확인
                 for (int i = 0; i < info.length; i++)
-                    if (info[i] == "") edits[i].setHint(alarm[i] + "was not filled."); //공란
+                    if (info[i].equals("")) edits[i].setHint(alarm[i] + "was not filled.");
 
+                // 모든 조건 충족시
                 if (mailCheck[1].equals("kookmin.ac.kr") && pw.equals(pwCheck) && Check.isChecked() && gender != "") {
                     if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0) {
                         firebaseAuth.createUserWithEmailAndPassword(mail,pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
+                                // 아이디(학번)가 중복되지 않는다면
                                 if (task.isSuccessful()) {
+                                    // Map을 이용해 정보 저장
                                     Map<String, Object> updates = new HashMap<>();
                                     Map<String, Object> values = null;
                                     values = toMap(pw, dp, mail, phone, gender);
@@ -103,23 +117,25 @@ public class JoinActivity extends AppCompatActivity {
                                     updates.put(Id, values);
                                     myRef.updateChildren(updates);
 
+                                    // 회원가입 화면에서 로그인 화면으로 이동
                                     Intent it = new Intent(JoinActivity.this, LoginActivity.class);
                                     startActivity(it);
                                 }
+                                // 아이디(학번) 중복
                                 else alarmtext.setText("ID is already existed.");
                             }
                         });
                     }
 
-                    else {
+                    else { // 하나라도 조건이 충족되지 않는다면
                         for (int i = 0; i < info.length; i++)
-                            if (info[i] == "") edits[i].setHint(alarm[i] + "was not filled.");
+                            if (info[i].equals("")) edits[i].setHint(alarm[i] + "was not filled.");
                     }
                 }
                 
                 else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
                 else if (!mailCheck.equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
-                else if (gender == "") alarmtext.setText("Please check the gender.");
+                else if (gender.equals("")) alarmtext.setText("Please check the gender.");
                 else if (!Check.isChecked()) alarmtext.setText("Please check to allow personal information.");
                 else alarmtext.setText("Please check the gender.");
 

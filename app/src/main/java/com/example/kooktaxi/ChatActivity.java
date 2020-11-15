@@ -23,20 +23,20 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
-    private ListView lv_chating;
+    public ListView lv_chating;
     private EditText et_send;
-    private Button btn_send;
+    public Button btn_send;
 
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> arr_room = new ArrayList<>();
 
-    private String str_room_name;
+    public String str_room_name;
     private String str_user_mail;
 
     private DatabaseReference reference;
     private String key;
-    private String chat_user;
-    private String chat_message;
+    public String chat_user;
+    public String chat_message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){

@@ -1,3 +1,7 @@
+/*
+파일명: LoginActivity.java
+개발자 이름: 조나영
+ */
 package com.example.kooktaxi;
 
 import androidx.annotation.NonNull;
@@ -56,14 +60,17 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // mail과 pw의 입력창의 값을 String으로 각각의 변수에 저장
                 mail = mailEdit.getText().toString();
                 pw = pwEdit.getText().toString();
 
+                // 입력값들의 조건에 충족하는지 확인
                 for (int i = 0; i < info.length; i++)
                     if (!PASSWORD_PATTERN.matcher(info[i]).matches()) edits[i].setHint("Please adjust the format.");
 
+                // 빈 칸이 있는지 확인
                 for (int i = 0; i < info.length; i++)
-                    if (info[i] == "") edits[i].setHint(fill[i] + "was not filled.");
+                    if (info[i].equals("")) edits[i].setHint(fill[i] + "was not filled.");
 
                 if (mail.length() != 0 && pw.length() != 0) {
                     firebaseAuth.signInWithEmailAndPassword(mail,pw)

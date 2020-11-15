@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class SearchActivity extends AppCompatActivity {
-    private ListView listView;
-    private Button btn_create;
+    public ListView listView;
+    public Button btn_create;
 
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> arr_roomList = new ArrayList<>();
@@ -46,7 +46,7 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        //닉네임 가져오기
+        // 닉네임 가져오기
         Intent intentID = getIntent();
         mail = intentID.getStringExtra("mail");
 
