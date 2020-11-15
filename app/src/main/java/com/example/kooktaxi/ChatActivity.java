@@ -1,6 +1,13 @@
+/*
+파일명: SearchActivity.java
+개발자 이름: 백연선, 이한정
+ */
 package com.example.kooktaxi;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -26,6 +33,8 @@ public class ChatActivity extends AppCompatActivity {
     public ListView lv_chating;
     private EditText et_send;
     public Button btn_send;
+    public Button btn_menu1;
+    public Button btn_menu2;
 
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> arr_room = new ArrayList<>();
@@ -45,6 +54,8 @@ public class ChatActivity extends AppCompatActivity {
         et_send = (EditText) findViewById(R.id.et_send);
         lv_chating = (ListView) findViewById(R.id.lv_chating);
         btn_send = (Button) findViewById(R.id.btn_send);
+        btn_menu1 = (Button) findViewById(R.id.btn_menu1);
+        btn_menu2 = (Button) findViewById(R.id.btn_menu2);
 
         str_room_name = getIntent().getExtras().get("room_name").toString();
         str_user_mail = getIntent().getExtras().get("user_mail").toString();
@@ -63,7 +74,6 @@ public class ChatActivity extends AppCompatActivity {
                 //map을 사용해 name과 메시지를 가져오고, key에 값 요청
                 Map<String, Object> map = new HashMap<String, Object>();
                 key = reference.push().getKey();
-//                reference.updateChildren(map);
 
                 DatabaseReference root = reference.child(key);
 
@@ -107,6 +117,29 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+
+    //메뉴 자바 코드
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu1, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()) {  //보완해야함
+            case R.id.itemCheck:
+                return true;
+            case R.id.itemOut:
+                return true;
+        }
+        return false;
+    }
+
     // addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있으면,
     // 화면에 보여지고 있는 Listview의 값을 갱신함
     private void chatConversation(DataSnapshot dataSnapshot) {
