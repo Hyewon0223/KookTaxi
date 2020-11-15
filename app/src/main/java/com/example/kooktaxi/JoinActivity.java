@@ -23,6 +23,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -110,13 +111,9 @@ public class JoinActivity extends AppCompatActivity {
                                 // 아이디(학번)가 중복되지 않는다면
                                 if (task.isSuccessful()) {
                                     // Map을 이용해 정보 저장
-                                    Map<String, Object> updates = new HashMap<>();
-                                    Map<String, Object> values = null;
-                                    values = toMap(pw, dp, mail, phone, gender);
+                                    Map<String, Object> values = toMap(pw, dp, mail, phone, gender);
 
-                                    updates.put(Id, values);
-                                    myRef.updateChildren(updates);
-
+                                    myRef.child("UserInfo").child(Id).updateChildren(values);
                                     // 회원가입 화면에서 로그인 화면으로 이동
                                     Intent it = new Intent(JoinActivity.this, LoginActivity.class);
                                     startActivity(it);
@@ -134,7 +131,7 @@ public class JoinActivity extends AppCompatActivity {
                 }
                 
                 else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
-                else if (!mailCheck.equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
+                else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
                 else if (gender.equals("")) alarmtext.setText("Please check the gender.");
                 else if (!Check.isChecked()) alarmtext.setText("Please check to allow personal information.");
                 else alarmtext.setText("Please check the gender.");

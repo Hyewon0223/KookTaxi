@@ -70,7 +70,7 @@ public class SearchActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i){
                         str_room = et_inDialog.getText().toString();
                         map.put(str_room, "");
-                        reference.updateChildren(map);
+                        reference.child("ChatInfo").updateChildren(map);
                     }
                 });
                 builder.setNegativeButton("취소", new DialogInterface.OnClickListener(){
@@ -90,7 +90,7 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot){
                 Set<String> set = new HashSet <String>();
-                Iterator i = dataSnapshot.getChildren().iterator();
+                Iterator i = dataSnapshot.child("ChatInfo").getChildren().iterator();
 
                 while (i.hasNext()){
                     set.add(((DataSnapshot) i.next()).getKey());

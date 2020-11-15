@@ -33,7 +33,6 @@ public class ChatActivity extends AppCompatActivity {
     public String str_room_name;
     private String str_user_mail;
 
-    private DatabaseReference reference;
     private String key;
     public String chat_user;
     public String chat_message;
@@ -49,7 +48,7 @@ public class ChatActivity extends AppCompatActivity {
 
         str_room_name = getIntent().getExtras().get("room_name").toString();
         str_user_mail = getIntent().getExtras().get("user_mail").toString();
-        reference = FirebaseDatabase.getInstance().getReference().child(str_room_name);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(str_room_name); // 채팅 정보 읽어옴
 
         setTitle(str_room_name + " 채팅방");
 
@@ -64,7 +63,7 @@ public class ChatActivity extends AppCompatActivity {
                 //map을 사용해 name과 메시지를 가져오고, key에 값 요청
                 Map<String, Object> map = new HashMap<String, Object>();
                 key = reference.push().getKey();
-                reference.updateChildren(map);
+//                reference.updateChildren(map);
 
                 DatabaseReference root = reference.child(key);
 
