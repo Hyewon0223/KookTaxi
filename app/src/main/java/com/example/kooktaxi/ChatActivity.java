@@ -33,8 +33,6 @@ public class ChatActivity extends AppCompatActivity {
     public ListView lv_chating;
     private EditText et_send;
     public Button btn_send;
-    public Button btn_menu1;
-    public Button btn_menu2;
 
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> arr_room = new ArrayList<>();
@@ -54,8 +52,6 @@ public class ChatActivity extends AppCompatActivity {
         et_send = (EditText) findViewById(R.id.et_send);
         lv_chating = (ListView) findViewById(R.id.lv_chating);
         btn_send = (Button) findViewById(R.id.btn_send);
-        btn_menu1 = (Button) findViewById(R.id.btn_menu1);
-        btn_menu2 = (Button) findViewById(R.id.btn_menu2);
 
         str_room_name = getIntent().getExtras().get("room_name").toString();
         str_user_mail = getIntent().getExtras().get("user_mail").toString();
@@ -131,10 +127,12 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {  //보완해야함
-            case R.id.itemCheck:
+        switch(item.getItemId()) {  //보완해야함!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+            case R.id.item_master:
                 return true;
-            case R.id.itemOut:
+            case R.id.item_user:
+                return true;
+            case R.id.item_out:
                 return true;
         }
         return false;

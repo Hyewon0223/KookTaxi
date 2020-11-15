@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
                 String markerTitle = getCurrentAddress(currentPosition);
                 String markerSnippet = "위도:" + String.valueOf(location.getLatitude()) + " 경도:" + String.valueOf(location.getLongitude());
-                setCurrentLocation(location, markerTitle, markerSnippet);
+                //setCurrentLocation(location, markerTitle, markerSnippet);
                 mCurrentLocatiion = location;
             }
         }
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void setDefaultLocation() {  //Default MarkerOptions를 설정해주는 함수(위치정보 제공이 허용되어 있지 않은 경우)
-        LatLng DEFAULT_LOCATION = new LatLng(37.52487, 126.92723);  //첫 위치를 서울(여의도 부근)으로 설정
+        LatLng DEFAULT_LOCATION = new LatLng(37.6119, 126.9955);  //첫 위치를 서울(국민대 부근)으로 설정
         String markerTitle = "위치정보 가져올 수 없음";
         String markerSnippet = "위치 퍼미션과 GPS 활성 요부 확인하세요";
 
