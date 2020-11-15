@@ -49,7 +49,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback{
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMarkerClickListener {
     private GoogleMap mMap;
     private Marker currentMarker = null;
 
@@ -69,10 +69,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Location location;
     private View mLayout;
 
+    private String mail;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = getIntent();
+        mail = intent.getStringExtra("mail");
 
         mLayout = findViewById(R.id.layout_main);
 
@@ -89,15 +94,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);  //레이아웃의 프래그먼트의 핸들을 가져옴
         mapFragment.getMapAsync(this);  //호출되면 onMapReady 콜백이 실행됨
 
-        // 버튼 페이지 연결
-        Button button = (Button) findViewById(R.id.btn_gil);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
-                startActivity(intent);
-            }
-        });
+//        // 버튼 페이지 연결
+//        Button button = (Button) findViewById(R.id.btn_gil);
+//        button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+//                intent.putExtra("mail", mail);
+//                startActivity(intent);
+//            }
+//        });
+
+
     }
 
     @Override
@@ -148,6 +156,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         for(int i=0; i<4; i++){
             mMap.addMarker(markerOptions[i]);  //addMarker()를 통해 GoogleMap객체(mMap)에 추가하면 지도에 표시된다.
         }
+
+        mMap.setOnMarkerClickListener(this);
     }
 
     LocationCallback locationCallback = new LocationCallback() {
@@ -350,5 +360,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 break;
         }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if(marker.getTitle().equals("길음역")){
+            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+            intent.putExtra("mail", mail);
+            startActivity(intent);
+        }
+
+        return true;
     }
 }

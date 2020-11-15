@@ -26,44 +26,44 @@
 
     </FrameLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/container"
-        android:layout_marginBottom="8dp"
-        android:gravity="center_horizontal">
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignBottom="@id/container"-->
+<!--        android:layout_marginBottom="8dp"-->
+<!--        android:gravity="center_horizontal">-->
 
-        <!-- 4개의 버튼 추가 -->
-        <Button
-            android:id="@+id/btn_gil"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="길음역"
-            android:textSize="13sp" />
+<!--        &lt;!&ndash; 4개의 버튼 추가 &ndash;&gt;-->
+<!--        <Button-->
+<!--            android:id="@+id/btn_gil"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="길음역"-->
+<!--            android:textSize="13sp" />-->
 
-        <Button
-            android:id="@+id/btn_gwa"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="광화문역"
-            android:textSize="13sp" />
+<!--        <Button-->
+<!--            android:id="@+id/btn_gwa"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="광화문역"-->
+<!--            android:textSize="13sp" />-->
 
-        <Button
-            android:id="@+id/btn_hon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="홍대입구역"
-            android:textSize="13sp" />
+<!--        <Button-->
+<!--            android:id="@+id/btn_hon"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="홍대입구역"-->
+<!--            android:textSize="13sp" />-->
 
-        <Button
-            android:id="@+id/btn_ddp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="동대문역사문화공원역"
-            android:textSize="13sp" />
+<!--        <Button-->
+<!--            android:id="@+id/btn_ddp"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="동대문역사문화공원역"-->
+<!--            android:textSize="13sp" />-->
 
 
-    </LinearLayout>
+<!--    </LinearLayout>-->
 
 
 </RelativeLayout>

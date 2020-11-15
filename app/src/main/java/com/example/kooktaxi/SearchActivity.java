@@ -36,7 +36,7 @@ public class SearchActivity extends AppCompatActivity {
     private DatabaseReference reference = FirebaseDatabase.getInstance().getReference().getRoot();
     private String name;
 
-    private String str_name;
+    private String mail;
     private String str_room;
 
     Map<String, Object> map = new HashMap<String, Object>();
@@ -48,7 +48,7 @@ public class SearchActivity extends AppCompatActivity {
 
         //닉네임 가져오기
         Intent intentID = getIntent();
-        str_name = intentID.getStringExtra("name");
+        mail = intentID.getStringExtra("mail");
 
         listView = (ListView) findViewById(R.id.list);
         btn_create = (Button) findViewById(R.id.btn_create);
@@ -113,7 +113,7 @@ public class SearchActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
                 intent.putExtra("room_name", ((TextView) view).getText().toString());
-                intent.putExtra("User_name",str_name);
+                intent.putExtra("user_mail",mail);
                 startActivity(intent);
             }
         });

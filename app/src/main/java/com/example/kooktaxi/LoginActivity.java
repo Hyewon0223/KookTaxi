@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                                     if (task.isSuccessful()){
                                         System.out.println("성공");
                                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        intent.putExtra("mail", mail);
                                         startActivity(intent);
                                     }
                                     else alarm.setText("This ID does not exist.");
