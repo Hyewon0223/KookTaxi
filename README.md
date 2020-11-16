@@ -5,5 +5,5 @@
 ---
 ### 실행 환경
 - Android Studio 4.0
-- AVD : Pixel 2 API 30
+- AVD : Pixel 2 API 30  --> 찐 모바일 단말기로 바꾸자 GPS(현재 위치 받아오기)때문에
 ---
