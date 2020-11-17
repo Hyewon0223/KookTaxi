@@ -379,6 +379,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(marker.getTitle().equals("길음역")){
             Intent intent = new Intent(MainActivity.this, SearchActivity.class);
             intent.putExtra("mail", mail);
+            intent.putExtra("station", "길음역");
+            startActivity(intent);
+        }
+        if(marker.getTitle().equals("홍대입구역")){
+            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+            intent.putExtra("mail", mail);
+            intent.putExtra("station", "홍대입구역");
+            startActivity(intent);
+        }
+        if(marker.getTitle().equals("광화문역")){
+            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+            intent.putExtra("mail", mail);
+            intent.putExtra("station","광화문역");
+            startActivity(intent);
+        }
+        if(marker.getTitle().equals("동대문역사문화공원역")){
+            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+            intent.putExtra("mail", mail);
+            intent.putExtra("station", "동대문역사문화공원역");
             startActivity(intent);
         }
 

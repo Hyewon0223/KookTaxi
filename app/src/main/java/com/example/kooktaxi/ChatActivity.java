@@ -39,6 +39,7 @@ public class ChatActivity extends AppCompatActivity {
 
     public String str_room_name;
     private String str_user_mail;
+    private String station;
 
     private String key;
     public String chat_user;
@@ -60,9 +61,11 @@ public class ChatActivity extends AppCompatActivity {
 
         str_room_name = getIntent().getExtras().get("room_name").toString();
         str_user_mail = getIntent().getExtras().get("user_mail").toString();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(str_room_name); // 채팅 정보 읽어옴
+        station = getIntent().getExtras().get("station").toString();
 
-        getSupportActionBar().setTitle("길음역 "+ str_room_name + " 채팅방");
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(station).child(str_room_name); // 채팅 정보 읽어옴
+
+        getSupportActionBar().setTitle(station +" "+ str_room_name + " 채팅방");
 
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);
         lv_chating.setAdapter(arrayAdapter);

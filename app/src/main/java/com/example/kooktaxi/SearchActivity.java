@@ -43,6 +43,7 @@ public class SearchActivity extends AppCompatActivity {
     private String name;
 
     private String mail;
+    private String station;
     private String str_room;
 
     Map<String, Object> map = new HashMap<String, Object>();
@@ -52,18 +53,19 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
-        setSupportActionBar(tb);
-
-        getSupportActionBar().setTitle("길음역");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        // 닉네임 가져오기
-        Intent intentID = getIntent();
-        mail = intentID.getStringExtra("mail");
+        // 닉네임 및 역 정보 가져오기
+        Intent intent = getIntent();
+        mail = intent.getStringExtra("mail");
+        station = intent.getStringExtra("station");
 
         listView = (ListView) findViewById(R.id.list);
         btn_create = (Button) findViewById(R.id.btn_create);
+
+        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
+
+        getSupportActionBar().setTitle(station);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // 채팅방 리스트를 보여준다.
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_roomList);
@@ -85,7 +87,7 @@ public class SearchActivity extends AppCompatActivity {
                         str_room = time_hour + "시"+time_minute+"분";
 
                         map.put(str_room, "");
-                        reference.child("ChatInfo").updateChildren(map);
+                        reference.child("ChatInfo").child(station).updateChildren(map);
                     }
                 });
                 builder.setNegativeButton("취소", new DialogInterface.OnClickListener(){
@@ -105,7 +107,7 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot){
                 Set<String> set = new HashSet <String>();
-                Iterator i = dataSnapshot.child("ChatInfo").getChildren().iterator();
+                Iterator i = dataSnapshot.child("ChatInfo").child(station).getChildren().iterator();
 
                 while (i.hasNext()){
                     set.add(((DataSnapshot) i.next()).getKey());
@@ -129,6 +131,7 @@ public class SearchActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
                 intent.putExtra("room_name", ((TextView) view).getText().toString());
                 intent.putExtra("user_mail",mail);
+                intent.putExtra("station", station);
                 startActivity(intent);
             }
         });
