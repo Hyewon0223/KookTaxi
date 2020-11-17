@@ -26,13 +26,18 @@
             android:id="@+id/et_send"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:privateImeOptions="defaultInputmode=korean" />
 
         <Button
             android:id="@+id/btn_send"
-            android:text="전송"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:background="#4CAF50"
+            android:textColor="#FFFFFF"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:text="send" />
 
     </LinearLayout>
 
