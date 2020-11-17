@@ -66,4 +66,41 @@ String mailCheck[] = mail.split("@");
 ...
 else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
 ~~~
+- 4개의 지하철역 좌표 객체 생성 후 마커 추가
+~~~java
+LatLng Gwanghwamun = new LatLng(37.5707456,126.973708); //(위도, 경도)
+LatLng Hongdae = new LatLng(37.557527,126.9222782);
+LatLng Gileum = new LatLng(37.6086541,127.0136683);
+LatLng DDP = new LatLng(37.5644,127.0055713);
 
+MarkerOptions[] markerOptions = new MarkerOptions[4];
+markerOptions[0] = new MarkerOptions()
+        .position(Gwanghwamun)
+        .title("광화문역");
+markerOptions[1] = new MarkerOptions()
+        .position(Hongdae)
+        .title("홍대입구역");
+markerOptions[2] = new MarkerOptions()
+        .position(Gileum)
+        .title("길음역");
+markerOptions[3] = new MarkerOptions()
+        .position(DDP)
+        .title("동대문역사문화공원역");
+
+for(int i=0; i<4; i++){
+    mMap.addMarker(markerOptions[i]);
+}
+~~~
+- 마커 클릭하면 해당 지하철 역의 activity 실행
+~~~java
+@Override
+public boolean onMarkerClick(Marker marker) {
+    if(marker.getTitle().equals("길음역")){
+        Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+        intent.putExtra("mail", mail);
+        startActivity(intent);
+    }
+    ...
+    return true;
+}
+~~~
