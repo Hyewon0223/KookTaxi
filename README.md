@@ -58,6 +58,9 @@
         android:layout_height="match_parent"
         android:layout_marginBottom="50dp" />
 ~~~
+#### menu
+##### menu1.xml, menu_toolbar.xml
+- 각 페이지의 툴바 작성
 #### Java
 ##### LoginActivity.java, JoinActivity.java, MainActivity.java, SearchActivity.java, CharActivity.java
 - 국민대 이메일이 아닌 경우 회원가입할 수 없음
