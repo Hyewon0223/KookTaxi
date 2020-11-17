@@ -67,6 +67,16 @@ public class SearchActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(station);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        tb.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                Intent intent = new Intent(SearchActivity.this, MainActivity.class);
+                intent.putExtra("mail", mail);
+                intent.putExtra("station", station);
+                startActivity(intent);
+            }
+        });
+
         // 채팅방 리스트를 보여준다.
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_roomList);
         listView.setAdapter(arrayAdapter);

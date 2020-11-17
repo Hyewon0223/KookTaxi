@@ -4,6 +4,7 @@
  */
 package com.example.kooktaxi;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,6 +59,7 @@ public class ChatActivity extends AppCompatActivity {
         setSupportActionBar(tb);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         et_send = (EditText) findViewById(R.id.et_send);
         lv_chating = (ListView) findViewById(R.id.lv_chating);
@@ -70,6 +72,16 @@ public class ChatActivity extends AppCompatActivity {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(station).child(str_room_name); // 채팅 정보 읽어옴
 
         getSupportActionBar().setTitle(station +" "+ str_room_name + " 채팅방");
+
+        tb.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                intent.putExtra("mail", str_user_mail);
+                intent.putExtra("station", station);
+                startActivity(intent);
+            }
+        });
 
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);
         lv_chating.setAdapter(arrayAdapter);
@@ -190,7 +202,7 @@ public class ChatActivity extends AppCompatActivity {
                 cnt++;
                 return true;
         }
-        return false;
+        return true;
     }
 
 //    public void addDepositChecked(MenuItem item) { //각 사용자의 입금이 확인되면 리스트에 넣어주는 함수

@@ -5,6 +5,7 @@
     <item
         android:id="@+id/menu_logo"
         android:icon="@drawable/kooktaxi"
-        app:showAsAction="always"/>
+        app:showAsAction="always"
+        android:title="logo" />
 
 </menu>
