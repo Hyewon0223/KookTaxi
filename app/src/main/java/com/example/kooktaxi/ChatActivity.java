@@ -1,5 +1,5 @@
 /*
-파일명: SearchActivity.java
+파일명: ChatActivity.java
 개발자 이름: 백연선, 이한정
  */
 package com.example.kooktaxi;
@@ -88,7 +88,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 root.updateChildren(objectMap);
 
-                System.out.println(str_user_mail);
+//                System.out.println(str_user_ID); // 메일 확인용
 
                 et_send.setText("");
             }
