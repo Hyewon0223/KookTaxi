@@ -60,5 +60,10 @@
 ~~~
 #### Java
 ##### LoginActivity.java, JoinActivity.java, MainActivity.java, SearchActivity.java, CharActivity.java
-
+- 국민대 이메일이 아닌 경우 회원가입할 수 없음
+~~~java
+String mailCheck[] = mail.split("@");
+...
+else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
+~~~
 
