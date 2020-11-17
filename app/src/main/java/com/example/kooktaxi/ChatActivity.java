@@ -23,6 +23,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +47,8 @@ public class ChatActivity extends AppCompatActivity {
     private String key;
     public String chat_user;
     public String chat_message;
+
+    public String master_mail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -96,6 +99,18 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                master_mail = snapshot.child("Email").getValue(String.class);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         reference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -129,10 +144,20 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu1, menu);
+        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
 
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu1, menu);
-        menuInflater.inflate(R.menu.menu_toolbar, menu);
+        MenuItem master_item = menu.findItem(R.id.item_master);
+        MenuItem user_item = menu.findItem(R.id.item_user);
+
+        if (str_user_mail.equals(master_mail)) {
+            master_item.setVisible(true);
+            user_item.setVisible(false);
+        }
+        else {
+            master_item.setVisible(false);
+            user_item.setVisible(true);
+        }
 
         return true;
     }
