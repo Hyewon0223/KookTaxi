@@ -86,8 +86,9 @@ public class SearchActivity extends AppCompatActivity {
                         int time_minute = et_inDialog.getCurrentMinute();
                         str_room = time_hour + "시"+time_minute+"분";
 
-                        map.put(str_room, "");
-                        reference.child("ChatInfo").child(station).updateChildren(map);
+                        Map<String, Object> values = toMap(mail, str_room);
+                        map.put(str_room,"");
+                        reference.child("ChatInfo").child(station).child(str_room).updateChildren(values);
                     }
                 });
                 builder.setNegativeButton("취소", new DialogInterface.OnClickListener(){
@@ -135,6 +136,15 @@ public class SearchActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    public Map<String, Object> toMap(String mail, String strRoom) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        result.put("Email", mail);
+        result.put("Room", strRoom);
+
+        return result;
     }
 
     @Override

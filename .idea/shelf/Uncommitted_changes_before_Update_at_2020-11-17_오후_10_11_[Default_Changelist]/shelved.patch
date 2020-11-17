@@ -1,0 +1,74 @@
+Index: app/src/main/java/com/example/kooktaxi/ChatActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n파일명: SearchActivity.java\r\n개발자 이름: 백연선, 이한정\r\n */\r\npackage com.example.kooktaxi;\r\n\r\nimport android.os.Bundle;\r\nimport android.view.Menu;\r\nimport android.view.MenuInflater;\r\nimport android.view.MenuItem;\r\nimport android.view.View;\r\nimport android.widget.ArrayAdapter;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.ListView;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.annotation.Nullable;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.google.firebase.database.ChildEventListener;\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.HashMap;\r\nimport java.util.Iterator;\r\nimport java.util.Map;\r\n\r\npublic class ChatActivity extends AppCompatActivity {\r\n    public ListView lv_chating;\r\n    private EditText et_send;\r\n    public Button btn_send;\r\n\r\n    private ArrayAdapter<String> arrayAdapter;\r\n    private ArrayList<String> arr_room = new ArrayList<>();\r\n\r\n    public String str_room_name;\r\n    private String str_user_mail;\r\n\r\n    private String key;\r\n    public String chat_user;\r\n    public String chat_message;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState){\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_chat);\r\n\r\n        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);\r\n        setSupportActionBar(tb);\r\n\r\n        getSupportActionBar().setDisplayHomeAsUpEnabled(true);\r\n\r\n        et_send = (EditText) findViewById(R.id.et_send);\r\n        lv_chating = (ListView) findViewById(R.id.lv_chating);\r\n        btn_send = (Button) findViewById(R.id.btn_send);\r\n\r\n        str_room_name = getIntent().getExtras().get(\"room_name\").toString();\r\n        str_user_mail = getIntent().getExtras().get(\"user_mail\").toString();\r\n        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child(\"ChatInfo\").child(str_room_name); // 채팅 정보 읽어옴\r\n\r\n        getSupportActionBar().setTitle(\"길음역 \"+ str_room_name + \" 채팅방\");\r\n\r\n        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);\r\n        lv_chating.setAdapter(arrayAdapter);\r\n        //리스트뷰가 갱신될 때 하단으로 자동 스크롤\r\n        lv_chating.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);\r\n\r\n        btn_send.setOnClickListener(new View.OnClickListener(){\r\n            @Override\r\n            public void onClick(View view){\r\n                //map을 사용해 name과 메시지를 가져오고, key에 값 요청\r\n                Map<String, Object> map = new HashMap<String, Object>();\r\n                key = reference.push().getKey();\r\n\r\n                DatabaseReference root = reference.child(key);\r\n\r\n                //updateChildren를 호출하여 database 최종 업데이트\r\n                Map<String, Object> objectMap = new HashMap<String, Object>();\r\n                objectMap.put(\"name\", str_user_mail);\r\n                objectMap.put(\"message\", et_send.getText().toString());\r\n\r\n                root.updateChildren(objectMap);\r\n\r\n                System.out.println(str_user_mail);\r\n\r\n                et_send.setText(\"\");\r\n            }\r\n        });\r\n\r\n        reference.addChildEventListener(new ChildEventListener() {\r\n            @Override\r\n            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n                chatConversation(dataSnapshot);\r\n            }\r\n\r\n            @Override\r\n            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n                chatConversation(dataSnapshot);\r\n            }\r\n\r\n            @Override\r\n            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {\r\n\r\n            }\r\n\r\n            @Override\r\n            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n\r\n            }\r\n\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError databaseError) {\r\n\r\n            }\r\n        });\r\n    }\r\n\r\n    //메뉴 자바 코드\r\n    @Override\r\n    public boolean onCreateOptionsMenu(Menu menu) {\r\n        super.onCreateOptionsMenu(menu);\r\n\r\n        MenuInflater menuInflater = getMenuInflater();\r\n        menuInflater.inflate(R.menu.menu1, menu);\r\n        menuInflater.inflate(R.menu.menu_toolbar, menu);\r\n\r\n        return true;\r\n    }\r\n\r\n    @Override\r\n    public boolean onOptionsItemSelected(@NonNull MenuItem item) {\r\n        switch(item.getItemId()) {\r\n            case R.id.item_master:\r\n                return true;\r\n            case R.id.item_matched:\r\n                getSupportActionBar().setDisplayHomeAsUpEnabled(false);\r\n                return true;\r\n            case R.id.item_out:\r\n                getSupportActionBar().setDisplayHomeAsUpEnabled(true);\r\n                return true;\r\n        }\r\n        return false;\r\n    }\r\n\r\n    // addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있으면,\r\n    // 화면에 보여지고 있는 Listview의 값을 갱신함\r\n    private void chatConversation(DataSnapshot dataSnapshot) {\r\n        Iterator i = dataSnapshot.getChildren().iterator();\r\n\r\n        while(i.hasNext()) {\r\n            chat_message = (String) ((DataSnapshot) i.next()).getValue();\r\n            chat_user = (String) ((DataSnapshot) i.next()).getValue();\r\n\r\n            arrayAdapter.add(chat_user + \" : \" + chat_message);\r\n        }\r\n\r\n        arrayAdapter.notifyDataSetChanged();\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/ChatActivity.java	(revision 996b498566cf0183e4aa8481d4a2251623a125f4)
++++ app/src/main/java/com/example/kooktaxi/ChatActivity.java	(date 1605617650917)
+@@ -44,6 +44,8 @@
+     public String chat_user;
+     public String chat_message;
+ 
++    public ArrayList<String> memberList = new ArrayList<>(4);
++
+     @Override
+     protected void onCreate(Bundle savedInstanceState){
+         super.onCreate(savedInstanceState);
+@@ -62,6 +64,8 @@
+         str_user_mail = getIntent().getExtras().get("user_mail").toString();
+         DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(str_room_name); // 채팅 정보 읽어옴
+ 
++        memberList.add(str_user_mail);
++
+         getSupportActionBar().setTitle("길음역 "+ str_room_name + " 채팅방");
+ 
+         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);
+@@ -155,6 +159,9 @@
+             chat_message = (String) ((DataSnapshot) i.next()).getValue();
+             chat_user = (String) ((DataSnapshot) i.next()).getValue();
+ 
++            if (!memberList.contains(chat_user))
++                memberList.add(chat_user);
++
+             arrayAdapter.add(chat_user + " : " + chat_message);
+         }
+ 
+Index: app/src/main/java/com/example/kooktaxi/SearchActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n파일명: SearchActivity.java\r\n개발자 이름: 최혜원\r\n */\r\npackage com.example.kooktaxi;\r\n\r\nimport android.app.AlertDialog;\r\nimport android.content.DialogInterface;\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.view.Menu;\r\nimport android.view.MenuInflater;\r\nimport android.view.View;\r\nimport android.widget.AdapterView;\r\nimport android.widget.ArrayAdapter;\r\nimport android.widget.Button;\r\nimport android.widget.ListView;\r\nimport android.widget.TextView;\r\nimport android.widget.TimePicker;\r\n\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.database.ValueEventListener;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.HashMap;\r\nimport java.util.HashSet;\r\nimport java.util.Iterator;\r\nimport java.util.Map;\r\nimport java.util.Set;\r\n\r\npublic class SearchActivity extends AppCompatActivity {\r\n    public ListView listView;\r\n    public Button btn_create;\r\n\r\n    private ArrayAdapter<String> arrayAdapter;\r\n    private ArrayList<String> arr_roomList = new ArrayList<>();\r\n    private DatabaseReference reference = FirebaseDatabase.getInstance().getReference().getRoot();\r\n    private String name;\r\n\r\n    private String mail;\r\n    private String str_room;\r\n\r\n    Map<String, Object> map = new HashMap<String, Object>();\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState){\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_search);\r\n\r\n        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);\r\n        setSupportActionBar(tb);\r\n\r\n        getSupportActionBar().setTitle(\"길음역\");\r\n        getSupportActionBar().setDisplayHomeAsUpEnabled(true);\r\n\r\n        // 닉네임 가져오기\r\n        Intent intentID = getIntent();\r\n        mail = intentID.getStringExtra(\"mail\");\r\n\r\n        listView = (ListView) findViewById(R.id.list);\r\n        btn_create = (Button) findViewById(R.id.btn_create);\r\n\r\n        // 채팅방 리스트를 보여준다.\r\n        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_roomList);\r\n        listView.setAdapter(arrayAdapter);\r\n\r\n        // 다이얼로그에서 채팅방 이름을 적어서 채팅방을 생성\r\n        btn_create.setOnClickListener(new View.OnClickListener(){\r\n            @Override\r\n            public void onClick(View view){\r\n                final TimePicker et_inDialog = new TimePicker(SearchActivity.this);\r\n                final AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);\r\n                builder.setTitle(\"채팅방 이름 입력\");\r\n                builder.setView(et_inDialog);\r\n                builder.setPositiveButton(\"확인\", new DialogInterface.OnClickListener(){\r\n                    @Override\r\n                    public void onClick(DialogInterface dialogInterface, int i){\r\n                        int time_hour = et_inDialog.getCurrentHour();\r\n                        int time_minute = et_inDialog.getCurrentMinute();\r\n                        str_room = time_hour + \"시\"+time_minute+\"분\";\r\n\r\n                        map.put(str_room, \"\");\r\n                        reference.child(\"ChatInfo\").updateChildren(map);\r\n                    }\r\n                });\r\n                builder.setNegativeButton(\"취소\", new DialogInterface.OnClickListener(){\r\n                    @Override\r\n                    public void onClick(DialogInterface dialogInterface, int i){\r\n                        dialogInterface.dismiss();\r\n                    }\r\n                });\r\n                builder.show();\r\n            }\r\n        });\r\n\r\n        // 특정 경로의 전체 내용에 대한 변경 사항을 읽고 수신 대기함\r\n        // onDataChange는 Database가 변경되었을때 호출되고\r\n        // onCancelled는 취소됐을때 호출됩니다.\r\n        reference.addValueEventListener(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(DataSnapshot dataSnapshot){\r\n                Set<String> set = new HashSet <String>();\r\n                Iterator i = dataSnapshot.child(\"ChatInfo\").getChildren().iterator();\r\n\r\n                while (i.hasNext()){\r\n                    set.add(((DataSnapshot) i.next()).getKey());\r\n                }\r\n                arr_roomList.clear();\r\n                arr_roomList.addAll(set);\r\n\r\n                arrayAdapter.notifyDataSetChanged();\r\n            }\r\n            @Override\r\n            public void onCancelled(DatabaseError databaseError){\r\n\r\n            }\r\n        });\r\n\r\n        // 리스트뷰의 채팅방을 클릭했을 때 반응\r\n        // 채팅방의 이름과 입장하는 유저의 이름을 전달\r\n        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {\r\n            @Override\r\n            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {\r\n                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);\r\n                intent.putExtra(\"room_name\", ((TextView) view).getText().toString());\r\n                intent.putExtra(\"user_mail\",mail);\r\n                startActivity(intent);\r\n            }\r\n        });\r\n    }\r\n\r\n    @Override\r\n    public boolean onCreateOptionsMenu(Menu menu){\r\n        MenuInflater menuInflater = getMenuInflater();\r\n        menuInflater.inflate(R.menu.menu_toolbar, menu);\r\n        return true;\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/SearchActivity.java	(revision 996b498566cf0183e4aa8481d4a2251623a125f4)
++++ app/src/main/java/com/example/kooktaxi/SearchActivity.java	(date 1605618548697)
+@@ -84,8 +84,9 @@
+                         int time_minute = et_inDialog.getCurrentMinute();
+                         str_room = time_hour + "시"+time_minute+"분";
+ 
+-                        map.put(str_room, "");
+-                        reference.child("ChatInfo").updateChildren(map);
++                        Map<String, Object> values = toMap(mail, str_room);
++
++                        reference.child("ChatInfo").child(str_room).updateChildren(values);
+                     }
+                 });
+                 builder.setNegativeButton("취소", new DialogInterface.OnClickListener(){
+@@ -134,6 +135,15 @@
+         });
+     }
+ 
++    public Map<String, Object> toMap(String email, String strRoom) {
++        HashMap<String, Object> result = new HashMap<>();
++
++        result.put("Email", email);
++        result.put("strRoom", strRoom);
++
++        return result;
++    }
++
+     @Override
+     public boolean onCreateOptionsMenu(Menu menu){
+         MenuInflater menuInflater = getMenuInflater();
