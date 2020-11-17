@@ -142,7 +142,7 @@ public class ChatActivity extends AppCompatActivity {
             case R.id.item_matched:
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 return true;
-            case R.id.item_out:
+            case R.id.item_deposit:
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 return true;
         }
