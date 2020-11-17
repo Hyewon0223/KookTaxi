@@ -1,3 +1,7 @@
+/*
+파일명: SearchActivity.java
+개발자 이름: 최혜원
+ */
 package com.example.kooktaxi;
 
 import android.app.AlertDialog;
@@ -8,9 +12,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -61,14 +65,17 @@ public class SearchActivity extends AppCompatActivity {
         btn_create.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                final EditText et_inDialog = new EditText(SearchActivity.this);
+                final TimePicker et_inDialog = new TimePicker(SearchActivity.this);
                 final AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);
                 builder.setTitle("채팅방 이름 입력");
                 builder.setView(et_inDialog);
                 builder.setPositiveButton("확인", new DialogInterface.OnClickListener(){
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i){
-                        str_room = et_inDialog.getText().toString();
+                        int time_hour = et_inDialog.getCurrentHour();
+                        int time_minute = et_inDialog.getCurrentMinute();
+                        str_room = time_hour + "시"+time_minute+"분";
+
                         map.put(str_room, "");
                         reference.child("ChatInfo").updateChildren(map);
                     }
