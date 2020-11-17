@@ -94,7 +94,7 @@ public class SearchActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i){
                         int time_hour = et_inDialog.getCurrentHour();
                         int time_minute = et_inDialog.getCurrentMinute();
-                        str_room = time_hour + "시"+time_minute+"분";
+                        str_room = time_hour+"시"+time_minute+"분";
 
                         Map<String, Object> values = toMap(mail, str_room);
                         map.put(str_room,"");

@@ -83,16 +83,16 @@ public class LoginActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()){
-                                        System.out.println("성공");
+//                                        System.out.println("성공");
                                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                         intent.putExtra("mail", mail);
                                         startActivity(intent);
                                     }
-                                    else alarm.setText("This ID does not exist.");
+                                    else alarm.setText("Please check your Email or Password again.");
                                 }
                             });
                 }
-                else alarm.setText("Fill in the blanks, please.");
+                else alarm.setText("Please fill in the blanks.");
             }
         });
     }
