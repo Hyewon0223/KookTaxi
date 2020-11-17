@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
+    public ArrayList<String> deposit_user_list; //입금 확인한 사용자 넣는 용도
+
     public ListView lv_chating;
     private EditText et_send;
     public Button btn_send;
@@ -120,6 +122,7 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     //메뉴 자바 코드
@@ -137,16 +140,39 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.item_master:
+            case R.id.item_matched: //매칭완료 아이템을 누르면
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false); //툴바의 뒤로가기 버튼을 안보이게 하고
+                //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다
                 return true;
-            case R.id.item_matched:
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            case R.id.item_user1:
+                addDepositChecked(item);
+                if(deposit_user_list.size() == 3) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true); //대신 뒤로가기 버튼 보이도록 함, 뒤로가기 버튼 누르면 데이터베이스에서 정보 삭제되도록 하고싶음
+                    //findViewById(R.id.item_out).setVisible(true);  <-- menuItem 접근 방법을 모르겠음. 그래서 setVisible()이 오류남
+                }
                 return true;
-            case R.id.item_deposit:
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            case R.id.item_user2:
+                addDepositChecked(item);
+                if(deposit_user_list.size() == 3) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    //findViewById(R.id.item_out).setVisible(true);
+                }
+                return true;
+            case R.id.item_user3:
+                addDepositChecked(item);
+                if(deposit_user_list.size() == 3) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    //findViewById(R.id.item_out).setVisible(true);
+                }
                 return true;
         }
         return false;
+    }
+
+    public void addDepositChecked(MenuItem item) { //각 사용자의 입금이 확인되면 리스트에 넣어주는 함수
+        if(item.isChecked()) {
+            deposit_user_list.add(item.getTitle().toString());
+        }
     }
 
     // addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있으면,

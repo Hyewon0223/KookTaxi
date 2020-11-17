@@ -72,8 +72,8 @@
         <menu>
             <item
                 android:id="@+id/item_out"
-                android:title = "나가기">
-            </item>
+                android:title="나가기"
+                android:visible="false"></item>
         </menu>
     </item>
 </menu>
