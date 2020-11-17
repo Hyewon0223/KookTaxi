@@ -8,19 +8,15 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,7 +25,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.kooktaxi.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -72,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private View mLayout;
 
     private String mail;
+    private String station[] = {"길음역","광화문역","동역사역","홍대입구역"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .title("길음역");
         markerOptions[3] = new MarkerOptions()
                 .position(DDP)
-                .title("동대문역사문화공원역");
+                .title("동역사역");
 
         for(int i=0; i<4; i++){
             mMap.addMarker(markerOptions[i]);  //addMarker()를 통해 GoogleMap객체(mMap)에 추가하면 지도에 표시된다.
@@ -376,31 +372,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if(marker.getTitle().equals("길음역")){
-            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
-            intent.putExtra("mail", mail);
-            intent.putExtra("station", "길음역");
-            startActivity(intent);
+        for (int i=0;i<station.length;i++) {
+            if (marker.getTitle().equals(station[i])) {
+                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+                intent.putExtra("mail", mail);
+                intent.putExtra("station", station[i]);
+                startActivity(intent);
+            }
         }
-        if(marker.getTitle().equals("홍대입구역")){
-            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
-            intent.putExtra("mail", mail);
-            intent.putExtra("station", "홍대입구역");
-            startActivity(intent);
-        }
-        if(marker.getTitle().equals("광화문역")){
-            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
-            intent.putExtra("mail", mail);
-            intent.putExtra("station","광화문역");
-            startActivity(intent);
-        }
-        if(marker.getTitle().equals("동대문역사문화공원역")){
-            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
-            intent.putExtra("mail", mail);
-            intent.putExtra("station", "동대문역사문화공원역");
-            startActivity(intent);
-        }
-
         return true;
     }
 }
