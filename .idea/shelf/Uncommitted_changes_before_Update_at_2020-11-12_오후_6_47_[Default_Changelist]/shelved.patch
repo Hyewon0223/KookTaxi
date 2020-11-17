@@ -1,0 +1,23 @@
+Index: app/src/main/res/layout/activity_chat.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.constraintlayout.widget.ConstraintLayout\r\n    xmlns:android=\"http://schemas.android.com/apk/res/android\" android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\">\r\n\r\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_chat.xml	(revision 78433adc5cfc9ab384c39120da30cb5486655be3)
++++ app/src/main/res/layout/activity_chat.xml	(date 1605173753391)
+@@ -3,4 +3,12 @@
+     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+     android:layout_height="match_parent">
+ 
++    <androidx.appcompat.widget.Toolbar
++        android:id="@+id/toolbar"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:background="#8BC34A"
++        android:minHeight="?attr/actionBarSize"
++        android:theme="?attr/actionBarTheme" />
++
+ </androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file

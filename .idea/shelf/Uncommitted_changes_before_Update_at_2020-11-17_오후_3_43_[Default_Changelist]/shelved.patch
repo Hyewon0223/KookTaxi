@@ -1,0 +1,547 @@
+Index: app/src/main/java/com/example/kooktaxi/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n파일명: MainActivity.java\r\n개발자 이름: 백연선, 이한정\r\n */\r\npackage com.example.kooktaxi;\r\n\r\nimport android.Manifest;\r\nimport android.content.DialogInterface;\r\nimport android.content.Intent;\r\nimport android.content.pm.PackageManager;\r\nimport android.graphics.Camera;\r\nimport android.location.Address;\r\nimport android.location.Geocoder;\r\nimport android.location.Location;\r\nimport android.location.LocationManager;\r\nimport android.os.Bundle;\r\nimport android.os.Looper;\r\nimport android.util.Log;\r\nimport android.view.View;\r\nimport android.view.WindowManager;\r\nimport android.widget.Button;\r\nimport android.widget.Toast;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.appcompat.app.AlertDialog;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.core.app.ActivityCompat;\r\nimport androidx.core.content.ContextCompat;\r\n\r\nimport com.example.kooktaxi.R;\r\nimport com.google.android.gms.location.FusedLocationProviderClient;\r\nimport com.google.android.gms.location.LocationCallback;\r\nimport com.google.android.gms.location.LocationRequest;\r\nimport com.google.android.gms.location.LocationResult;\r\nimport com.google.android.gms.location.LocationServices;\r\nimport com.google.android.gms.location.LocationSettingsRequest;\r\nimport com.google.android.gms.maps.CameraUpdate;\r\nimport com.google.android.gms.maps.CameraUpdateFactory;\r\nimport com.google.android.gms.maps.GoogleMap;\r\nimport com.google.android.gms.maps.OnMapReadyCallback;\r\nimport com.google.android.gms.maps.SupportMapFragment;\r\nimport com.google.android.gms.maps.model.BitmapDescriptorFactory;\r\nimport com.google.android.gms.maps.model.LatLng;\r\nimport com.google.android.gms.maps.model.Marker;\r\nimport com.google.android.gms.maps.model.MarkerOptions;\r\nimport com.google.android.material.snackbar.Snackbar;\r\n\r\nimport java.io.IOException;\r\nimport java.util.List;\r\nimport java.util.Locale;\r\n\r\npublic class MainActivity extends AppCompatActivity implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMarkerClickListener {\r\n    private GoogleMap mMap;\r\n    private Marker currentMarker = null;\r\n\r\n    private static final int GPS_ENABLE_REQUEST_CODE = 2001;\r\n    private static final int UPDATE_INTERVAL_MS = 1000;  //1초\r\n    private static final int FASTEST_UPDATE_INTERVAL_MS = 500; //0.5초\r\n    private static final int PERMISSIONS_REQUEST_CODE = 100; //onRequestPermissionsResult에서 수신된 결과에서 ActivityCompat.requestPermissions를 사용한 퍼미션 요청을 구별하기 위해 사용됨.\r\n    boolean needRequest = false; //위와 동일\r\n\r\n    String[] REQUIRED_PERMISSIONS  = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION };  //앱을 실행하기 위해 필요한 퍼미션을 정의\r\n\r\n    Location mCurrentLocatiion;\r\n    LatLng currentPosition;\r\n\r\n    private FusedLocationProviderClient mFusedLocationClient;\r\n    private LocationRequest locationRequest;\r\n    private Location location;\r\n    private View mLayout;\r\n\r\n    private String mail;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_main);\r\n\r\n        Intent intent = getIntent();\r\n        mail = intent.getStringExtra(\"mail\");\r\n\r\n        mLayout = findViewById(R.id.layout_main);\r\n\r\n        locationRequest = new LocationRequest()\r\n                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)\r\n                .setInterval(UPDATE_INTERVAL_MS)\r\n                .setFastestInterval(FASTEST_UPDATE_INTERVAL_MS);\r\n\r\n        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();\r\n\r\n        builder.addLocationRequest(locationRequest);\r\n        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);\r\n\r\n        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);  //레이아웃의 프래그먼트의 핸들을 가져옴\r\n        mapFragment.getMapAsync(this);  //호출되면 onMapReady 콜백이 실행됨\r\n\r\n//        // 버튼 페이지 연결\r\n//        Button button = (Button) findViewById(R.id.btn_gil);\r\n//        button.setOnClickListener(new View.OnClickListener() {\r\n//            @Override\r\n//            public void onClick(View v) {\r\n//                Intent intent = new Intent(MainActivity.this, SearchActivity.class);\r\n//                intent.putExtra(\"mail\", mail);\r\n//                startActivity(intent);\r\n//            }\r\n//        });\r\n\r\n\r\n    }\r\n\r\n    @Override\r\n    public void onMapReady(final GoogleMap googleMap) {  //map이 사용할 준비가 되었을 때(GoogleMap 객체를 파라미터로 제공할 수 있을 때) 호출되는 메소드\r\n        mMap = googleMap;\r\n        setDefaultLocation();  //초기위치 서울로 이동\r\n\r\n        // 위치 퍼미션을 가지고 있는지 확인\r\n        int hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);\r\n        int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);\r\n\r\n        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED && hasCoarseLocationPermission == PackageManager.PERMISSION_GRANTED) {  //퍼미션을 가지고 있으면\r\n            startLocationUpdates();  //위치 업데이트 시작\r\n        } else {  //퍼미션 요청을 허용한 적 없다면\r\n            if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])) {  //사용자가 퍼미션을 거부한 적 있는 경우에는\r\n                Snackbar.make(mLayout, \"이 앱을 실행하려면 위치 접근 권한이 필요합니다.\", Snackbar.LENGTH_INDEFINITE).setAction(\"확인\", new View.OnClickListener() {  //snackbar(이유를 보여주고, 사용자가 확인을 클릭을 해야 사라짐)로 허용을 요청함. 요청 결과는 onRequestPermissionResult에서 수신.\r\n                    @Override\r\n                    public void onClick(View view) {\r\n                        ActivityCompat.requestPermissions( MainActivity.this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);\r\n                    }\r\n                }).show();\r\n            } else {  //사용자가 퍼미션 거부를 한 적 없으면\r\n                ActivityCompat.requestPermissions( this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);  //바로 퍼미션 요청을 함\r\n            }\r\n        }\r\n        mMap.getUiSettings().setMyLocationButtonEnabled(true);\r\n\r\n        //좌표 객체 생성(우선 4개의 역 좌표 객체를 생성함)\r\n        LatLng Gwanghwamun = new LatLng(37.5707456,126.973708); //(위도, 경도)\r\n        LatLng Hongdae = new LatLng(37.557527,126.9222782);\r\n        LatLng Gileum = new LatLng(37.6086541,127.0136683);\r\n        LatLng DDP = new LatLng(37.5644,127.0055713);\r\n\r\n        MarkerOptions[] markerOptions = new MarkerOptions[4];  //마커옵션 배열 생성. 각 마커의 위치와 타이틀을 설정해줌.\r\n        markerOptions[0] = new MarkerOptions()\r\n                .position(Gwanghwamun)\r\n                .title(\"광화문역\");\r\n        markerOptions[1] = new MarkerOptions()\r\n                .position(Hongdae)\r\n                .title(\"홍대입구역\");\r\n        markerOptions[2] = new MarkerOptions()\r\n                .position(Gileum)\r\n                .title(\"길음역\");\r\n        markerOptions[3] = new MarkerOptions()\r\n                .position(DDP)\r\n                .title(\"동대문역사문화공원역\");\r\n\r\n        for(int i=0; i<4; i++){\r\n            mMap.addMarker(markerOptions[i]);  //addMarker()를 통해 GoogleMap객체(mMap)에 추가하면 지도에 표시된다.\r\n        }\r\n\r\n        mMap.setOnMarkerClickListener(this);\r\n    }\r\n\r\n    LocationCallback locationCallback = new LocationCallback() {\r\n        @Override\r\n        public void onLocationResult(LocationResult locationResult) {\r\n\r\n            super.onLocationResult(locationResult);\r\n            List<Location> locationList = locationResult.getLocations();\r\n            if (locationList.size() > 0) {\r\n                location = locationList.get(locationList.size() - 1);\r\n                currentPosition = new LatLng(location.getLatitude(), location.getLongitude());\r\n                String markerTitle = getCurrentAddress(currentPosition);\r\n                String markerSnippet = \"위도:\" + String.valueOf(location.getLatitude()) + \" 경도:\" + String.valueOf(location.getLongitude());\r\n                //setCurrentLocation(location, markerTitle, markerSnippet);\r\n                mCurrentLocatiion = location;\r\n            }\r\n        }\r\n    };\r\n\r\n\r\n\r\n    private void startLocationUpdates() {\r\n        if (!checkLocationServicesStatus()) {  //위치설정이 되지 않았으면\r\n            showDialogForLocationServiceSetting();  //위치설정을 한다\r\n        } else {\r\n            int hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);\r\n            int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);\r\n\r\n            if (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED ||  hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) {\r\n                return;\r\n            }\r\n            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());\r\n            if (checkPermission())\r\n                mMap.setMyLocationEnabled(true);\r\n        }\r\n    }\r\n\r\n    @Override\r\n    protected void onStart() {\r\n        super.onStart();\r\n        if (checkPermission()) {\r\n            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);\r\n            if (mMap!=null)\r\n                mMap.setMyLocationEnabled(true);\r\n        }\r\n    }\r\n\r\n    @Override\r\n    protected void onStop() {\r\n        super.onStop();\r\n        if (mFusedLocationClient != null) {\r\n            mFusedLocationClient.removeLocationUpdates(locationCallback);\r\n        }\r\n    }\r\n\r\n    public String getCurrentAddress(LatLng latlng) {\r\n        Geocoder geocoder = new Geocoder(this, Locale.getDefault());\r\n        List<Address> addresses;\r\n\r\n        try {\r\n            addresses = geocoder.getFromLocation(latlng.latitude, latlng.longitude,1);\r\n        } catch (IOException ioException) {\r\n            Toast.makeText(this, \"지오코더 서비스 사용불가\", Toast.LENGTH_LONG).show();\r\n            return \"지오코더 서비스 사용불가\";\r\n        } catch (IllegalArgumentException illegalArgumentException) {\r\n            Toast.makeText(this, \"잘못된 GPS 좌표\", Toast.LENGTH_LONG).show();\r\n            return \"잘못된 GPS 좌표\";\r\n        }\r\n\r\n        if (addresses == null || addresses.size() == 0) {\r\n            Toast.makeText(this, \"주소 미발견\", Toast.LENGTH_LONG).show();\r\n            return \"주소 미발견\";\r\n        } else {\r\n            Address address = addresses.get(0);\r\n            return address.getAddressLine(0).toString();\r\n        }\r\n    }\r\n\r\n    public boolean checkLocationServicesStatus() { //locationManager를 통해 GPS와 네트워크가 사용 가능한지  체크해주는 함수\r\n        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);\r\n\r\n        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)\r\n                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);\r\n    }\r\n\r\n    public void setCurrentLocation(Location location, String markerTitle, String markerSnippet) {\r\n        if (currentMarker != null) currentMarker.remove(); //마커가 존재하면 마커를 지운다\r\n        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude()); //현재 위치\r\n\r\n        MarkerOptions markerOptions = new MarkerOptions(); //마커 옵션 설정\r\n        markerOptions.position(currentLatLng);\r\n        markerOptions.title(markerTitle);\r\n        markerOptions.snippet(markerSnippet);\r\n        markerOptions.draggable(true);\r\n\r\n        currentMarker = mMap.addMarker(markerOptions); //해당 마커 추가\r\n\r\n        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng); //카메라를 현재 위치로 이동\r\n        mMap.moveCamera(cameraUpdate);\r\n    }\r\n\r\n    public void setDefaultLocation() {  //Default MarkerOptions를 설정해주는 함수(위치정보 제공이 허용되어 있지 않은 경우)\r\n        LatLng DEFAULT_LOCATION = new LatLng(37.6119, 126.9955);  //첫 위치를 서울(국민대 부근)으로 설정\r\n        String markerTitle = \"위치정보 가져올 수 없음\";\r\n        String markerSnippet = \"위치 퍼미션과 GPS 활성 요부 확인하세요\";\r\n\r\n        if (currentMarker != null) currentMarker.remove();\r\n\r\n        MarkerOptions markerOptions = new MarkerOptions();\r\n        markerOptions.position(DEFAULT_LOCATION);\r\n        markerOptions.title(markerTitle);\r\n        markerOptions.snippet(markerSnippet);\r\n        markerOptions.draggable(true);\r\n        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));\r\n        currentMarker = mMap.addMarker(markerOptions);\r\n\r\n        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15);  //두번째 인자(15)는 카메라 줌의 정도를 나타냄\r\n        mMap.moveCamera(cameraUpdate);\r\n    }\r\n\r\n    //런타임 퍼미션 처리 메소드들\r\n    private boolean checkPermission() {\r\n        int hasFineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);\r\n        int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);\r\n        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED && hasCoarseLocationPermission == PackageManager.PERMISSION_GRANTED) {\r\n            return true;\r\n        }\r\n        return false;\r\n    }\r\n\r\n    @Override\r\n    public void onRequestPermissionsResult(int permsRequestCode, @NonNull String[] permissions, @NonNull int[] grandResults) { //ActivityCompat.requestPermissions를 사용한 퍼미션 요청의 결과를 리턴받는 메소드.\r\n        if (permsRequestCode == PERMISSIONS_REQUEST_CODE && grandResults.length == REQUIRED_PERMISSIONS.length) { //요청 코드가 PERMISSIONS_REQUEST_CODE이고, 요청한 퍼미션 개수만큼 수신되었다면\r\n            boolean check_result = true;\r\n\r\n            for (int result : grandResults) { //모든 퍼미션을 허용했는지 체크한다.\r\n                if (result != PackageManager.PERMISSION_GRANTED) {\r\n                    check_result = false;\r\n                    break;\r\n                }\r\n            }\r\n            if (check_result) { //모든 퍼미션을 허용했으면\r\n                startLocationUpdates(); //위치 업데이트를 시작한다\r\n            }\r\n            else { //거부한 퍼미션이 있다면\r\n                if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0]) //REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}\r\n                        || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])) { //사용자가 거부만 선택한 경우\r\n                    Snackbar.make(mLayout, \"퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해주세요.\",\r\n                            Snackbar.LENGTH_INDEFINITE).setAction(\"확인\", new View.OnClickListener() { //앱을 다시 실행해서 허용을 선택하면 된다는 Snackbar를 띄운다\r\n                        @Override\r\n                        public void onClick(View view) {\r\n                            finish();\r\n                        }\r\n                    }).show();\r\n                }else { //\"다시 묻지 않음\"을 선택한 경우\r\n                    Snackbar.make(mLayout, \"퍼미션이 거부되었습니다. 설정(앱 정보)에서 퍼미션을 허용해야 합니다. \", //설정에서 직접 퍼미션을 허용해야 한다는 Snackbar를 띄운다.\r\n                            Snackbar.LENGTH_INDEFINITE).setAction(\"확인\", new View.OnClickListener() {\r\n                        @Override\r\n                        public void onClick(View view) {\r\n                            finish();\r\n                        }\r\n                    }).show();\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    //GPS 활성화를 위한 메소드들\r\n    private void showDialogForLocationServiceSetting() {\r\n        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this); //AlertDialog는일부 화면만 가리는 윈도우. 정보 입력받을 수 있음\r\n        builder.setTitle(\"위치 서비스 비활성화\"); //Dialog 제목\r\n        builder.setMessage(\"앱을 사용하기 위해서는 위치 서비스가 필요합니다.\"); //메세지\r\n        builder.setCancelable(true); //배경이나 뒤로가기 키 누르면 취소 가능\r\n        builder.setPositiveButton(\"설정\", new DialogInterface.OnClickListener() { //positive button을 설정버튼으로 설정\r\n            @Override\r\n            public void onClick(DialogInterface dialog, int id) {\r\n                Intent callGPSSettingIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);\r\n                startActivityForResult(callGPSSettingIntent, GPS_ENABLE_REQUEST_CODE);\r\n            }\r\n        });\r\n        builder.setNegativeButton(\"취소\", new DialogInterface.OnClickListener() { //negative button을 취소 버튼으로 설정\r\n            @Override\r\n            public void onClick(DialogInterface dialog, int id) {\r\n                dialog.cancel();\r\n            }\r\n        });\r\n        builder.create().show();\r\n    }\r\n\r\n\r\n    @Override\r\n    protected void onActivityResult(int requestCode, int resultCode, Intent data) {\r\n        super.onActivityResult(requestCode, resultCode, data);\r\n\r\n        switch (requestCode) {\r\n            case GPS_ENABLE_REQUEST_CODE:\r\n                if (checkLocationServicesStatus()) { //사용자가 GPS 활성 시켰는지 검사\r\n                    needRequest = true;\r\n                    return;\r\n                }\r\n                break;\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public boolean onMarkerClick(Marker marker) {\r\n        if(marker.getTitle().equals(\"길음역\")){\r\n            Intent intent = new Intent(MainActivity.this, SearchActivity.class);\r\n            intent.putExtra(\"mail\", mail);\r\n            startActivity(intent);\r\n        }\r\n\r\n        return true;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/MainActivity.java	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/java/com/example/kooktaxi/MainActivity.java	(date 1605594595387)
+@@ -16,6 +16,8 @@
+ import android.os.Bundle;
+ import android.os.Looper;
+ import android.util.Log;
++import android.view.Menu;
++import android.view.MenuInflater;
+ import android.view.View;
+ import android.view.WindowManager;
+ import android.widget.Button;
+@@ -76,6 +78,9 @@
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_main);
+ 
++        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
++        setSupportActionBar(tb);
++
+         Intent intent = getIntent();
+         mail = intent.getStringExtra("mail");
+ 
+@@ -108,6 +113,13 @@
+ 
+     }
+ 
++    @Override
++    public boolean onCreateOptionsMenu(Menu menu){
++        MenuInflater menuInflater = getMenuInflater();
++        menuInflater.inflate(R.menu.menu_toolbar, menu);
++        return true;
++    }
++
+     @Override
+     public void onMapReady(final GoogleMap googleMap) {  //map이 사용할 준비가 되었을 때(GoogleMap 객체를 파라미터로 제공할 수 있을 때) 호출되는 메소드
+         mMap = googleMap;
+@@ -372,4 +384,4 @@
+ 
+         return true;
+     }
+-}
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/kooktaxi/SearchActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.kooktaxi;\r\n\r\nimport android.app.AlertDialog;\r\nimport android.content.DialogInterface;\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.view.View;\r\nimport android.widget.AdapterView;\r\nimport android.widget.ArrayAdapter;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.ListView;\r\nimport android.widget.TextView;\r\n\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.database.ValueEventListener;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.HashMap;\r\nimport java.util.HashSet;\r\nimport java.util.Iterator;\r\nimport java.util.Map;\r\nimport java.util.Set;\r\n\r\npublic class SearchActivity extends AppCompatActivity {\r\n    public ListView listView;\r\n    public Button btn_create;\r\n\r\n    private ArrayAdapter<String> arrayAdapter;\r\n    private ArrayList<String> arr_roomList = new ArrayList<>();\r\n    private DatabaseReference reference = FirebaseDatabase.getInstance().getReference().getRoot();\r\n    private String name;\r\n\r\n    private String mail;\r\n    private String str_room;\r\n\r\n    Map<String, Object> map = new HashMap<String, Object>();\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState){\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_search);\r\n\r\n        // 닉네임 가져오기\r\n        Intent intentID = getIntent();\r\n        mail = intentID.getStringExtra(\"mail\");\r\n\r\n        listView = (ListView) findViewById(R.id.list);\r\n        btn_create = (Button) findViewById(R.id.btn_create);\r\n\r\n        // 채팅방 리스트를 보여준다.\r\n        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_roomList);\r\n        listView.setAdapter(arrayAdapter);\r\n\r\n        // 다이얼로그에서 채팅방 이름을 적어서 채팅방을 생성\r\n        btn_create.setOnClickListener(new View.OnClickListener(){\r\n            @Override\r\n            public void onClick(View view){\r\n                final EditText et_inDialog = new EditText(SearchActivity.this);\r\n                final AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);\r\n                builder.setTitle(\"채팅방 이름 입력\");\r\n                builder.setView(et_inDialog);\r\n                builder.setPositiveButton(\"확인\", new DialogInterface.OnClickListener(){\r\n                    @Override\r\n                    public void onClick(DialogInterface dialogInterface, int i){\r\n                        str_room = et_inDialog.getText().toString();\r\n                        map.put(str_room, \"\");\r\n                        reference.child(\"ChatInfo\").updateChildren(map);\r\n                    }\r\n                });\r\n                builder.setNegativeButton(\"취소\", new DialogInterface.OnClickListener(){\r\n                    @Override\r\n                    public void onClick(DialogInterface dialogInterface, int i){\r\n                        dialogInterface.dismiss();\r\n                    }\r\n                });\r\n                builder.show();\r\n            }\r\n        });\r\n\r\n        // 특정 경로의 전체 내용에 대한 변경 사항을 읽고 수신 대기함\r\n        // onDataChange는 Database가 변경되었을때 호출되고\r\n        // onCancelled는 취소됐을때 호출됩니다.\r\n        reference.addValueEventListener(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(DataSnapshot dataSnapshot){\r\n                Set<String> set = new HashSet <String>();\r\n                Iterator i = dataSnapshot.child(\"ChatInfo\").getChildren().iterator();\r\n\r\n                while (i.hasNext()){\r\n                    set.add(((DataSnapshot) i.next()).getKey());\r\n                }\r\n                arr_roomList.clear();\r\n                arr_roomList.addAll(set);\r\n\r\n                arrayAdapter.notifyDataSetChanged();\r\n            }\r\n            @Override\r\n            public void onCancelled(DatabaseError databaseError){\r\n\r\n            }\r\n        });\r\n\r\n        // 리스트뷰의 채팅방을 클릭했을 때 반응\r\n        // 채팅방의 이름과 입장하는 유저의 이름을 전달\r\n        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {\r\n            @Override\r\n            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {\r\n                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);\r\n                intent.putExtra(\"room_name\", ((TextView) view).getText().toString());\r\n                intent.putExtra(\"user_mail\",mail);\r\n                startActivity(intent);\r\n            }\r\n        });\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/SearchActivity.java	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/java/com/example/kooktaxi/SearchActivity.java	(date 1605594595381)
+@@ -4,6 +4,8 @@
+ import android.content.DialogInterface;
+ import android.content.Intent;
+ import android.os.Bundle;
++import android.view.Menu;
++import android.view.MenuInflater;
+ import android.view.View;
+ import android.widget.AdapterView;
+ import android.widget.ArrayAdapter;
+@@ -46,6 +48,11 @@
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_search);
+ 
++        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
++        setSupportActionBar(tb);
++
++        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
++
+         // 닉네임 가져오기
+         Intent intentID = getIntent();
+         mail = intentID.getStringExtra("mail");
+@@ -118,4 +125,11 @@
+             }
+         });
+     }
+-}
++
++    @Override
++    public boolean onCreateOptionsMenu(Menu menu){
++        MenuInflater menuInflater = getMenuInflater();
++        menuInflater.inflate(R.menu.menu_toolbar, menu);
++        return true;
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/kooktaxi/JoinActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n파일명: JoinActivity.java\r\n개발자 이름: 조나영, 최혜원\r\n */\r\npackage com.example.kooktaxi;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.view.View;\r\nimport android.widget.Button;\r\nimport android.widget.CheckBox;\r\nimport android.widget.EditText;\r\nimport android.widget.RadioGroup;\r\nimport android.widget.TextView;\r\n\r\nimport com.google.android.gms.tasks.OnCompleteListener;\r\nimport com.google.android.gms.tasks.Task;\r\nimport com.google.firebase.auth.AuthResult;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\n\r\nimport java.util.Dictionary;\r\nimport java.util.HashMap;\r\nimport java.util.Map;\r\nimport java.util.regex.Pattern;\r\n\r\npublic class JoinActivity extends AppCompatActivity {\r\n    private FirebaseAuth firebaseAuth;\r\n\r\n    private static final Pattern PASSWORD_PATTERN = Pattern.compile(\"^[a-zA-Z0-9!@.#$%^&*?_~]{4,16}$\");\r\n\r\n    public String Id = \"\";\r\n    public String mail = \"\";\r\n    public String pw = \"\";\r\n    public String pwCheck = \"\";\r\n    public String dp = \"\";\r\n    public String phone = \"\";\r\n    public String gender = \"\";\r\n\r\n    String[] info = {Id, mail, pw, dp, phone};\r\n    String[] alarm = {\"ID \", \"Email \", \"Password \", \"Department \", \"Phone Number \"};\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_join);\r\n\r\n        EditText IDEdit = (EditText) findViewById(R.id.IDjoinEdit);\r\n        EditText mailEdit = (EditText) findViewById(R.id.emailjoinEdit);\r\n        EditText pwEdit = (EditText) findViewById(R.id.PwjoinEdit);\r\n        EditText dpEdit = (EditText) findViewById(R.id.dpjoinEdit);\r\n        EditText phoneEdit = (EditText) findViewById(R.id.phonejoinEdit);\r\n        EditText pwCheckEdit = (EditText) findViewById(R.id.pwjoinCheckEdit);\r\n\r\n        EditText[] edits = {IDEdit,  mailEdit, pwEdit, dpEdit, phoneEdit};\r\n\r\n        RadioGroup rg = (RadioGroup) findViewById(R.id.RadioGroup);\r\n\r\n        rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {\r\n            @Override\r\n            public void onCheckedChanged(RadioGroup group, int checkedId) {\r\n                if (checkedId == R.id.maleButton) gender = \"male\";\r\n                else if (checkedId == R.id.femaleButton) gender = \"female\";\r\n            }\r\n        });\r\n\r\n        CheckBox Check = (CheckBox) findViewById(R.id.check);\r\n        TextView alarmtext = (TextView) findViewById(R.id.alarmText);\r\n\r\n        Button joinButton = (Button) findViewById(R.id.joinButton);\r\n\r\n        // Firebase 설정\r\n        FirebaseDatabase database = FirebaseDatabase.getInstance();\r\n        DatabaseReference myRef = database.getReference();\r\n        firebaseAuth = FirebaseAuth.getInstance();\r\n\r\n        // joinButton을 클릭했을 때\r\n        joinButton.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View v) {\r\n                // 모든 입력 값들을 String으로 각각의 변수에 저장\r\n                Id = IDEdit.getText().toString();\r\n                mail = mailEdit.getText().toString();\r\n                pw = pwEdit.getText().toString();\r\n                pwCheck = pwCheckEdit.getText().toString();\r\n                dp = dpEdit.getText().toString();\r\n                phone = phoneEdit.getText().toString();\r\n\r\n                // mail = \"123456@kookmin.ac.kr\r\n                // mailCheck 배열에 '@'를 기준으로 분리해 저장\r\n                String mailCheck[] = mail.split(\"@\");\r\n\r\n                //password 양식에 적합한지 검사\r\n                for (int i = 1; i < 2; i++)\r\n                    if (!PASSWORD_PATTERN.matcher(info[i]).matches()) edits[i].setHint(\"Please adjust the format.\");\r\n\r\n                //빈 칸이 있는지 확인\r\n                for (int i = 0; i < info.length; i++)\r\n                    if (info[i].equals(\"\")) edits[i].setHint(alarm[i] + \"was not filled.\");\r\n\r\n                // 모든 조건 충족시\r\n                if (mailCheck[1].equals(\"kookmin.ac.kr\") && pw.equals(pwCheck) && Check.isChecked() && gender != \"\") {\r\n                    if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0) {\r\n                        firebaseAuth.createUserWithEmailAndPassword(mail,pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {\r\n                            @Override\r\n                            public void onComplete(@NonNull Task<AuthResult> task) {\r\n                                // 아이디(학번)가 중복되지 않는다면\r\n                                if (task.isSuccessful()) {\r\n                                    // Map을 이용해 정보 저장\r\n                                    Map<String, Object> values = toMap(pw, dp, mail, phone, gender);\r\n\r\n                                    myRef.child(\"UserInfo\").child(Id).updateChildren(values);\r\n                                    // 회원가입 화면에서 로그인 화면으로 이동\r\n                                    Intent it = new Intent(JoinActivity.this, LoginActivity.class);\r\n                                    startActivity(it);\r\n                                }\r\n                                // 아이디(학번) 중복\r\n                                else alarmtext.setText(\"ID is already existed.\");\r\n                            }\r\n                        });\r\n                    }\r\n\r\n                    else { // 하나라도 조건이 충족되지 않는다면\r\n                        for (int i = 0; i < info.length; i++)\r\n                            if (info[i].equals(\"\")) edits[i].setHint(alarm[i] + \"was not filled.\");\r\n                    }\r\n                }\r\n                \r\n                else if (!pw.equals(pwCheck)) alarmtext.setText(\"Please check the password.\");\r\n                else if (!mailCheck[1].equals(\"kookmin.ac.kr\")) alarmtext.setText(\"Please check the email.\");\r\n                else if (gender.equals(\"\")) alarmtext.setText(\"Please check the gender.\");\r\n                else if (!Check.isChecked()) alarmtext.setText(\"Please check to allow personal information.\");\r\n                else alarmtext.setText(\"Please check the gender.\");\r\n\r\n            }\r\n        });\r\n    }\r\n\r\n    public Map<String, Object> toMap(String pw, String dp, String mail, String phone, String gender) {\r\n        HashMap<String, Object> result = new HashMap<>();\r\n\r\n        result.put(\"Password\", pw);\r\n        result.put(\"Department\", dp);\r\n        result.put(\"Email\", mail);\r\n        result.put(\"Phone Number\", phone);\r\n        result.put(\"Gender\", gender);\r\n\r\n        return result;\r\n    }\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/JoinActivity.java	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/java/com/example/kooktaxi/JoinActivity.java	(date 1605594595374)
+@@ -15,6 +15,8 @@
+ import android.widget.EditText;
+ import android.widget.RadioGroup;
+ import android.widget.TextView;
++import android.view.Menu;
++import android.view.MenuInflater;
+ 
+ import com.google.android.gms.tasks.OnCompleteListener;
+ import com.google.android.gms.tasks.Task;
+@@ -49,6 +51,11 @@
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_join);
+ 
++        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
++        setSupportActionBar(tb);
++
++        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
++
+         EditText IDEdit = (EditText) findViewById(R.id.IDjoinEdit);
+         EditText mailEdit = (EditText) findViewById(R.id.emailjoinEdit);
+         EditText pwEdit = (EditText) findViewById(R.id.PwjoinEdit);
+@@ -129,7 +136,7 @@
+                             if (info[i].equals("")) edits[i].setHint(alarm[i] + "was not filled.");
+                     }
+                 }
+-                
++
+                 else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
+                 else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
+                 else if (gender.equals("")) alarmtext.setText("Please check the gender.");
+@@ -140,6 +147,13 @@
+         });
+     }
+ 
++    @Override
++    public boolean onCreateOptionsMenu(Menu menu){
++        MenuInflater menuInflater = getMenuInflater();
++        menuInflater.inflate(R.menu.menu_toolbar, menu);
++        return true;
++    }
++
+     public Map<String, Object> toMap(String pw, String dp, String mail, String phone, String gender) {
+         HashMap<String, Object> result = new HashMap<>();
+ 
+Index: app/src/main/res/layout/activity_join.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".JoinActivity\">\r\n\r\n    <TextView\r\n        android:id=\"@+id/IDjoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginStart=\"45dp\"\r\n        android:layout_marginLeft=\"45dp\"\r\n        android:layout_marginTop=\"50dp\"\r\n        android:text=\"ID\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/IDjoinEdit\"\r\n        android:layout_width=\"285dp\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginStart=\"47dp\"\r\n        android:layout_marginLeft=\"47dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/IDjoinText\"\r\n        android:hint=\"\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/pwjoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/IDjoinText\"\r\n        android:layout_marginStart=\"20dp\"\r\n        android:layout_marginLeft=\"20dp\"\r\n        android:layout_marginTop=\"30dp\"\r\n        android:text=\"Password\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/PwjoinEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/IDjoinEdit\"\r\n        android:layout_marginStart=\"22dp\"\r\n        android:layout_marginLeft=\"23dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/pwjoinText\"\r\n        android:ems=\"10\"\r\n        android:hint=\"\"\r\n        android:inputType=\"textPassword\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/dpjoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/pwjoinCheckText\"\r\n        android:layout_marginStart=\"15dp\"\r\n        android:layout_marginLeft=\"15dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:text=\"Department\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/pwjoinCheckEdit\"\r\n        android:layout_width=\"284dp\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@+id/PwjoinEdit\"\r\n        android:layout_marginStart=\"3dp\"\r\n        android:layout_marginLeft=\"3dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_toEndOf=\"@+id/pwjoinCheckText\"\r\n        android:layout_toRightOf=\"@+id/pwjoinCheckText\"\r\n        android:ems=\"10\"\r\n        android:inputType=\"textPassword\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/pwjoinCheckText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/pwjoinText\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:text=\"CheckPassWord\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/dpjoinEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@+id/pwjoinCheckEdit\"\r\n        android:layout_marginStart=\"18dp\"\r\n        android:layout_marginLeft=\"18dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/dpjoinText\"\r\n        android:hint=\"\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/emailjoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/dpjoinText\"\r\n        android:layout_marginStart=\"35dp\"\r\n        android:layout_marginLeft=\"35dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:text=\"Email\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/emailjoinEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/dpjoinEdit\"\r\n        android:layout_marginStart=\"37dp\"\r\n        android:layout_marginLeft=\"37dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/emailjoinText\"\r\n        android:hint=\"\"\r\n        android:inputType=\"textEmailAddress\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/phonejoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/emailjoinText\"\r\n        android:layout_marginStart=\"10dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:text=\"PhoneNumber\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/phonejoinEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/emailjoinEdit\"\r\n        android:layout_marginStart=\"10dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/phonejoinText\"\r\n        android:hint=\"\"/>\r\n\r\n    <TextView\r\n        android:id=\"@+id/genderJoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/phonejoinText\"\r\n        android:layout_marginStart=\"31dp\"\r\n        android:layout_marginLeft=\"31dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:text=\"Gender\" />\r\n\r\n    <RadioGroup\r\n        android:id=\"@+id/RadioGroup\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/phonejoinEdit\"\r\n        android:layout_marginStart=\"28dp\"\r\n        android:layout_marginLeft=\"28dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_toRightOf=\"@id/genderJoinText\"\r\n        android:orientation=\"horizontal\">\r\n\r\n        <RadioButton\r\n            android:id=\"@+id/maleButton\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:text=\"Male\" />\r\n\r\n        <RadioButton\r\n            android:id=\"@+id/femaleButton\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"10dp\"\r\n            android:layout_marginLeft=\"10dp\"\r\n            android:text=\"Female\" />\r\n    </RadioGroup>\r\n\r\n    <CheckBox\r\n        android:id=\"@+id/check\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/genderJoinText\"\r\n        android:layout_alignParentBottom=\"false\"\r\n        android:layout_marginStart=\"200dp\"\r\n        android:layout_marginLeft=\"200dp\"\r\n        android:layout_marginTop=\"30dp\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/checkText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/genderJoinText\"\r\n        android:layout_alignParentBottom=\"false\"\r\n        android:layout_marginTop=\"43dp\"\r\n        android:layout_toRightOf=\"@id/check\"\r\n        android:text=\"개인 정보 보호 동의\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/alarmText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_above=\"@id/joinButton\"\r\n        android:layout_centerHorizontal=\"true\"\r\n        android:layout_marginBottom=\"10dp\" />\r\n\r\n    <Button\r\n        android:id=\"@+id/joinButton\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"80dp\"\r\n        android:layout_alignParentBottom=\"true\"\r\n        android:layout_marginStart=\"10dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:layout_marginEnd=\"10dp\"\r\n        android:layout_marginRight=\"10dp\"\r\n        android:layout_marginBottom=\"10dp\"\r\n        android:text=\"Join\" />\r\n\r\n</RelativeLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_join.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/res/layout/activity_join.xml	(date 1605595358181)
+@@ -6,13 +6,17 @@
+     android:layout_height="match_parent"
+     tools:context=".JoinActivity">
+ 
++    <include
++        layout="@layout/toolbar"
++        android:id="@+id/toolbar" />
++
+     <TextView
+         android:id="@+id/IDjoinText"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_marginStart="45dp"
+         android:layout_marginLeft="45dp"
+-        android:layout_marginTop="50dp"
++        android:layout_marginTop="100dp"
+         android:text="ID" />
+ 
+     <EditText
+@@ -21,7 +25,7 @@
+         android:layout_height="wrap_content"
+         android:layout_marginStart="47dp"
+         android:layout_marginLeft="47dp"
+-        android:layout_marginTop="35dp"
++        android:layout_marginTop="90dp"
+         android:layout_marginEnd="20dp"
+         android:layout_marginRight="20dp"
+         android:layout_toRightOf="@id/IDjoinText"
+Index: app/src/main/res/layout/activity_chat.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<LinearLayout\r\n    xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:orientation=\"vertical\">\r\n\r\n    <ListView\r\n        android:id=\"@+id/lv_chating\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\"\r\n        android:layout_marginBottom=\"50dp\">\r\n    </ListView>\r\n\r\n    <LinearLayout\r\n        android:layout_marginTop=\"-50dp\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:orientation=\"horizontal\">\r\n\r\n        <EditText\r\n            android:id=\"@+id/et_send\"\r\n            android:layout_width=\"0dp\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_weight=\"1\"/>\r\n\r\n        <Button\r\n            android:id=\"@+id/btn_send\"\r\n            android:text=\"전송\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"/>\r\n\r\n    </LinearLayout>\r\n\r\n</LinearLayout>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_chat.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/res/layout/activity_chat.xml	(date 1605595358191)
+@@ -5,6 +5,10 @@
+     android:layout_height="match_parent"
+     android:orientation="vertical">
+ 
++    <include
++        layout="@layout/toolbar"
++        android:id="@+id/toolbar" />
++
+     <ListView
+         android:id="@+id/lv_chating"
+         android:layout_width="match_parent"
+@@ -22,7 +26,7 @@
+             android:id="@+id/et_send"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+-            android:layout_weight="1"/>
++            android:layout_weight="1" />
+ 
+         <Button
+             android:id="@+id/btn_send"
+@@ -32,4 +36,4 @@
+ 
+     </LinearLayout>
+ 
+-</LinearLayout>
++</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/java/com/example/kooktaxi/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n파일명: LoginActivity.java\r\n개발자 이름: 조나영\r\n */\r\npackage com.example.kooktaxi;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.view.View;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.TextView;\r\n\r\nimport com.google.android.gms.tasks.OnCompleteListener;\r\nimport com.google.android.gms.tasks.Task;\r\nimport com.google.firebase.auth.AuthResult;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\n\r\nimport java.util.regex.Pattern;\r\n\r\npublic class LoginActivity extends AppCompatActivity {\r\n    private FirebaseAuth firebaseAuth;\r\n\r\n    private static final Pattern PASSWORD_PATTERN = Pattern.compile(\"^[a-zA-Z0-9!@.#$%^&*?_~]{4,16}$\");\r\n\r\n    public String mail = \"\";\r\n    public String pw = \"\";\r\n\r\n    String[] info = {mail, pw};\r\n    String[] fill = {\"Email \", \"Password \"};\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_login);\r\n\r\n        Button joinButton = (Button) findViewById(R.id.Joinbutton);\r\n        Button loginButton = (Button) findViewById(R.id.Loginbutton);\r\n\r\n        EditText mailEdit = (EditText) findViewById(R.id.mailEditText);\r\n        EditText pwEdit = (EditText) findViewById(R.id.pwEditText);\r\n\r\n        EditText[] edits = {mailEdit, pwEdit};\r\n\r\n        TextView alarm = (TextView) findViewById(R.id.alarmTextView);\r\n\r\n        firebaseAuth = FirebaseAuth.getInstance();\r\n\r\n        joinButton.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View v) {\r\n                Intent it = new Intent(LoginActivity.this, JoinActivity.class);\r\n                startActivity(it);\r\n            }\r\n        });\r\n\r\n        loginButton.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View v) {\r\n                // mail과 pw의 입력창의 값을 String으로 각각의 변수에 저장\r\n                mail = mailEdit.getText().toString();\r\n                pw = pwEdit.getText().toString();\r\n\r\n                // 입력값들의 조건에 충족하는지 확인\r\n                for (int i = 0; i < info.length; i++)\r\n                    if (!PASSWORD_PATTERN.matcher(info[i]).matches()) edits[i].setHint(\"Please adjust the format.\");\r\n\r\n                // 빈 칸이 있는지 확인\r\n                for (int i = 0; i < info.length; i++)\r\n                    if (info[i].equals(\"\")) edits[i].setHint(fill[i] + \"was not filled.\");\r\n\r\n                if (mail.length() != 0 && pw.length() != 0) {\r\n                    firebaseAuth.signInWithEmailAndPassword(mail,pw)\r\n                            .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {\r\n                                @Override\r\n                                public void onComplete(@NonNull Task<AuthResult> task) {\r\n                                    if (task.isSuccessful()){\r\n                                        System.out.println(\"성공\");\r\n                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);\r\n                                        intent.putExtra(\"mail\", mail);\r\n                                        startActivity(intent);\r\n                                    }\r\n                                    else alarm.setText(\"This ID does not exist.\");\r\n                                }\r\n                            });\r\n                }\r\n                else alarm.setText(\"Fill in the blanks, please.\");\r\n            }\r\n        });\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/LoginActivity.java	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/java/com/example/kooktaxi/LoginActivity.java	(date 1605594092534)
+@@ -13,6 +13,8 @@
+ import android.widget.Button;
+ import android.widget.EditText;
+ import android.widget.TextView;
++import android.view.Menu;
++import android.view.MenuInflater;
+ 
+ import com.google.android.gms.tasks.OnCompleteListener;
+ import com.google.android.gms.tasks.Task;
+@@ -37,6 +39,9 @@
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_login);
+ 
++        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
++        setSupportActionBar(tb);
++
+         Button joinButton = (Button) findViewById(R.id.Joinbutton);
+         Button loginButton = (Button) findViewById(R.id.Loginbutton);
+ 
+@@ -91,4 +96,11 @@
+             }
+         });
+     }
++
++    @Override
++    public boolean onCreateOptionsMenu(Menu menu){
++        MenuInflater menuInflater = getMenuInflater();
++        menuInflater.inflate(R.menu.menu_toolbar, menu);
++        return true;
++    }
+ }
+\ No newline at end of file
+Index: gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#Tue Nov 03 20:38:55 KST 2020\r\ndistributionBase=GRADLE_USER_HOME\r\ndistributionPath=wrapper/dists\r\nzipStoreBase=GRADLE_USER_HOME\r\nzipStorePath=wrapper/dists\r\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.1.1-all.zip\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>x-windows-949
+===================================================================
+--- gradle/wrapper/gradle-wrapper.properties	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ gradle/wrapper/gradle-wrapper.properties	(date 1605589405271)
+@@ -1,6 +1,6 @@
+-#Tue Nov 03 20:38:55 KST 2020
++#Thu Nov 12 16:56:05 KST 2020
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-6.1.1-all.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-6.5-bin.zip
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_1_8\" project-jdk-name=\"1.8\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/misc.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ .idea/misc.xml	(date 1605589415070)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/build/classes" />
+   </component>
+   <component name="ProjectType">
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleMigrationSettings\" migrationVersion=\"1\" />\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"testRunner\" value=\"PLATFORM\" />\r\n        <option name=\"distributionType\" value=\"DEFAULT_WRAPPED\" />\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"gradleJvm\" value=\"1.8\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n            <option value=\"$PROJECT_DIR$/app\" />\r\n          </set>\r\n        </option>\r\n        <option name=\"resolveModulePerSourceSet\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/gradle.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ .idea/gradle.xml	(date 1605589415082)
+@@ -15,6 +15,7 @@
+           </set>
+         </option>
+         <option name="resolveModulePerSourceSet" value="false" />
++        <option name="useQualifiedModuleNames" value="true" />
+       </GradleProjectSettings>
+     </option>
+   </component>
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    package=\"com.example.kooktaxi\">\r\n\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/AppTheme\">\r\n\r\n        <meta-data\r\n            android:name=\"com.google.android.geo.API_KEY\"\r\n            android:value=\"AIzaSyAOXI92i2E2noR0RzUTNK2hARgVYt7GQrA\" />\r\n\r\n        <activity android:name=\".LoginActivity\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n        <activity android:name=\".JoinActivity\" />\r\n        <activity android:name=\".MainActivity\"/>\r\n        <activity android:name=\".SearchActivity\"/>\r\n        <activity android:name=\".ChatActivity\"/>\r\n\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/AndroidManifest.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/AndroidManifest.xml	(date 1605589415127)
+@@ -11,7 +11,7 @@
+         android:label="@string/app_name"
+         android:roundIcon="@mipmap/ic_launcher_round"
+         android:supportsRtl="true"
+-        android:theme="@style/AppTheme">
++        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+ 
+         <meta-data
+             android:name="com.google.android.geo.API_KEY"
+@@ -24,10 +24,16 @@
+                 <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
+         </activity>
+-        <activity android:name=".JoinActivity" />
++        <activity
++            android:name=".JoinActivity"
++            android:parentActivityName=".LoginActivity"/>
+         <activity android:name=".MainActivity"/>
+-        <activity android:name=".SearchActivity"/>
+-        <activity android:name=".ChatActivity"/>
++        <activity
++            android:name=".SearchActivity"
++            android:parentActivityName=".MainActivity"/>
++        <activity
++            android:name=".ChatActivity"
++            android:parentActivityName=".SearchActivity"/>
+ 
+     </application>
+ 
+Index: app/src/main/res/values/styles.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\r\n    <!-- Base application theme. -->\r\n    <style name=\"AppTheme\" parent=\"Theme.AppCompat.Light.DarkActionBar\">\r\n        <!-- Customize your theme here. -->\r\n        <item name=\"colorPrimary\">@color/colorPrimary</item>\r\n        <item name=\"colorPrimaryDark\">@color/colorPrimaryDark</item>\r\n        <item name=\"colorAccent\">@color/colorAccent</item>\r\n    </style>\r\n\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/styles.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/res/values/styles.xml	(date 1605589415345)
+@@ -1,6 +1,6 @@
+ <resources>
+     <!-- Base application theme. -->
+-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
++    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+         <!-- Customize your theme here. -->
+         <item name="colorPrimary">@color/colorPrimary</item>
+         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+Index: app/src/main/java/com/example/kooktaxi/ChatActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n파일명: SearchActivity.java\r\n개발자 이름: 백연선, 이한정\r\n */\r\npackage com.example.kooktaxi;\r\n\r\nimport android.os.Bundle;\r\nimport android.view.Menu;\r\nimport android.view.MenuInflater;\r\nimport android.view.MenuItem;\r\nimport android.view.View;\r\nimport android.widget.ArrayAdapter;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.ListView;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.annotation.Nullable;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.google.firebase.database.ChildEventListener;\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.HashMap;\r\nimport java.util.Iterator;\r\nimport java.util.Map;\r\n\r\npublic class ChatActivity extends AppCompatActivity {\r\n    public ListView lv_chating;\r\n    private EditText et_send;\r\n    public Button btn_send;\r\n\r\n    private ArrayAdapter<String> arrayAdapter;\r\n    private ArrayList<String> arr_room = new ArrayList<>();\r\n\r\n    public String str_room_name;\r\n    private String str_user_mail;\r\n\r\n    private String key;\r\n    public String chat_user;\r\n    public String chat_message;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState){\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_chat);\r\n\r\n        et_send = (EditText) findViewById(R.id.et_send);\r\n        lv_chating = (ListView) findViewById(R.id.lv_chating);\r\n        btn_send = (Button) findViewById(R.id.btn_send);\r\n\r\n        str_room_name = getIntent().getExtras().get(\"room_name\").toString();\r\n        str_user_mail = getIntent().getExtras().get(\"user_mail\").toString();\r\n        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child(\"ChatInfo\").child(str_room_name); // 채팅 정보 읽어옴\r\n\r\n        setTitle(str_room_name + \" 채팅방\");\r\n\r\n        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);\r\n        lv_chating.setAdapter(arrayAdapter);\r\n        //리스트뷰가 갱신될 때 하단으로 자동 스크롤\r\n        lv_chating.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);\r\n\r\n        btn_send.setOnClickListener(new View.OnClickListener(){\r\n            @Override\r\n            public void onClick(View view){\r\n                //map을 사용해 name과 메시지를 가져오고, key에 값 요청\r\n                Map<String, Object> map = new HashMap<String, Object>();\r\n                key = reference.push().getKey();\r\n\r\n                DatabaseReference root = reference.child(key);\r\n\r\n                //updateChildren를 호출하여 database 최종 업데이트\r\n                Map<String, Object> objectMap = new HashMap<String, Object>();\r\n                objectMap.put(\"name\", str_user_mail);\r\n                objectMap.put(\"message\", et_send.getText().toString());\r\n\r\n                root.updateChildren(objectMap);\r\n\r\n                System.out.println(str_user_mail);\r\n\r\n                et_send.setText(\"\");\r\n            }\r\n        });\r\n\r\n        reference.addChildEventListener(new ChildEventListener() {\r\n            @Override\r\n            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n                chatConversation(dataSnapshot);\r\n            }\r\n\r\n            @Override\r\n            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n                chatConversation(dataSnapshot);\r\n            }\r\n\r\n            @Override\r\n            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {\r\n\r\n            }\r\n\r\n            @Override\r\n            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n\r\n            }\r\n\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError databaseError) {\r\n\r\n            }\r\n        });\r\n    }\r\n\r\n    //메뉴 자바 코드\r\n    @Override\r\n    public boolean onCreateOptionsMenu(Menu menu) {\r\n        super.onCreateOptionsMenu(menu);\r\n\r\n        MenuInflater menuInflater = getMenuInflater();\r\n        menuInflater.inflate(R.menu.menu1, menu);\r\n\r\n        return true;\r\n    }\r\n\r\n    @Override\r\n    public boolean onOptionsItemSelected(@NonNull MenuItem item) {\r\n        switch(item.getItemId()) {  //보완해야함!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\r\n            case R.id.item_master:\r\n                return true;\r\n            case R.id.item_user:\r\n                return true;\r\n            case R.id.item_out:\r\n                return true;\r\n        }\r\n        return false;\r\n    }\r\n\r\n    // addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있으면,\r\n    // 화면에 보여지고 있는 Listview의 값을 갱신함\r\n    private void chatConversation(DataSnapshot dataSnapshot) {\r\n        Iterator i = dataSnapshot.getChildren().iterator();\r\n\r\n        while(i.hasNext()) {\r\n            chat_message = (String) ((DataSnapshot) i.next()).getValue();\r\n            chat_user = (String) ((DataSnapshot) i.next()).getValue();\r\n\r\n            arrayAdapter.add(chat_user + \" : \" + chat_message);\r\n        }\r\n\r\n        arrayAdapter.notifyDataSetChanged();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/ChatActivity.java	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/java/com/example/kooktaxi/ChatActivity.java	(date 1605594595394)
+@@ -49,6 +49,11 @@
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_chat);
+ 
++        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
++        setSupportActionBar(tb);
++
++        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
++
+         et_send = (EditText) findViewById(R.id.et_send);
+         lv_chating = (ListView) findViewById(R.id.lv_chating);
+         btn_send = (Button) findViewById(R.id.btn_send);
+@@ -121,6 +126,7 @@
+ 
+         MenuInflater menuInflater = getMenuInflater();
+         menuInflater.inflate(R.menu.menu1, menu);
++        menuInflater.inflate(R.menu.menu_toolbar, menu);
+ 
+         return true;
+     }
+@@ -152,4 +158,4 @@
+ 
+         arrayAdapter.notifyDataSetChanged();
+     }
+-}
++}
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_search.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:orientation = \"vertical\">\r\n\r\n\r\n    <ListView\r\n        android:id = \"@+id/list\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\"\r\n        android:layout_marginBottom=\"50dp\"/>\r\n\r\n    <Button\r\n        android:id = \"@+id/btn_create\"\r\n        android:text = \"채팅방 생성\"\r\n        android:textSize = \"13sp\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"50dp\"\r\n        android:layout_marginTop =\"-50dp\"/>\r\n\r\n</LinearLayout>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_search.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/res/layout/activity_search.xml	(date 1605593570615)
+@@ -6,6 +6,9 @@
+     android:layout_height="match_parent"
+     android:orientation = "vertical">
+ 
++    <include
++        layout="@layout/toolbar"
++        android:id="@+id/toolbar" />
+ 
+     <ListView
+         android:id = "@+id/list"
+@@ -21,4 +24,4 @@
+         android:layout_height="50dp"
+         android:layout_marginTop ="-50dp"/>
+ 
+-</LinearLayout>
++</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_login.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".LoginActivity\">\r\n\r\n    <ImageView\r\n        android:id=\"@+id/LogoimageView\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_centerHorizontal=\"true\"\r\n        android:layout_marginTop=\"230dp\"\r\n        app:srcCompat=\"@android:drawable/sym_def_app_icon\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/mailTextView\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/LogoimageView\"\r\n        android:layout_marginStart=\"85dp\"\r\n        android:layout_marginLeft=\"85dp\"\r\n        android:layout_marginTop=\"65dp\"\r\n        android:text=\"Email\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/mailEditText\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/LogoimageView\"\r\n        android:layout_marginStart=\"30dp\"\r\n        android:layout_marginLeft=\"30dp\"\r\n        android:layout_marginTop=\"50dp\"\r\n        android:layout_marginEnd=\"100dp\"\r\n        android:layout_marginRight=\"100dp\"\r\n        android:layout_toRightOf=\"@id/mailTextView\"\r\n        android:inputType=\"textEmailAddress\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/PwtextView\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/mailTextView\"\r\n        android:layout_marginStart=\"70dp\"\r\n        android:layout_marginLeft=\"70dp\"\r\n        android:layout_marginTop=\"50dp\"\r\n        android:text=\"Password\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/pwEditText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/mailEditText\"\r\n        android:layout_marginStart=\"10dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:layout_marginTop=\"30dp\"\r\n        android:layout_marginEnd=\"100dp\"\r\n        android:layout_marginRight=\"100dp\"\r\n        android:layout_toRightOf=\"@id/PwtextView\"\r\n        android:ems=\"10\"\r\n        android:inputType=\"textPassword\" />\r\n\r\n    <Button\r\n        android:id=\"@+id/Loginbutton\"\r\n        android:layout_width=\"170dp\"\r\n        android:layout_height=\"80dp\"\r\n        android:layout_alignParentBottom=\"true\"\r\n        android:layout_marginStart=\"28dp\"\r\n        android:layout_marginLeft=\"28dp\"\r\n        android:layout_marginBottom=\"20dp\"\r\n        android:text=\"Login\" />\r\n\r\n    <Button\r\n        android:id=\"@+id/Joinbutton\"\r\n        android:layout_width=\"170dp\"\r\n        android:layout_height=\"80dp\"\r\n        android:layout_alignParentBottom=\"true\"\r\n        android:layout_marginStart=\"10dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:layout_marginBottom=\"20dp\"\r\n        android:layout_toRightOf=\"@id/Loginbutton\"\r\n        android:text=\"Join\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/alarmTextView\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_above=\"@id/Loginbutton\"\r\n        android:layout_centerHorizontal=\"true\"\r\n        android:layout_marginBottom=\"10dp\" />\r\n\r\n</RelativeLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_login.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/res/layout/activity_login.xml	(date 1605594721242)
+@@ -6,13 +6,17 @@
+     android:layout_height="match_parent"
+     tools:context=".LoginActivity">
+ 
++    <include
++        layout="@layout/toolbar"
++        android:id="@+id/toolbar" />
++
+     <ImageView
+         android:id="@+id/LogoimageView"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_centerHorizontal="true"
+-        android:layout_marginTop="230dp"
+-        app:srcCompat="@android:drawable/sym_def_app_icon" />
++        android:layout_marginTop="180dp"
++        app:srcCompat="@mipmap/kooktaxi" />
+ 
+     <TextView
+         android:id="@+id/mailTextView"
+Index: app/src/main/res/layout/activity_main.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<!--\r\n파일명: activity_Main.xml\r\n개발자 이름: 백연선, 이한정)\r\n-->\r\n<RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:id=\"@+id/layout_main\"\r\n    tools:context=\".MainActivity\">\r\n\r\n    <FrameLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\"\r\n        android:id=\"@+id/container\">\r\n\r\n        <!-- map component 추가-->\r\n        <fragment\r\n            android:id=\"@+id/map\"\r\n            android:name=\"com.google.android.gms.maps.SupportMapFragment\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"match_parent\"\r\n            tools:context=\".MapsActivity\" />\r\n\r\n    </FrameLayout>\r\n\r\n<!--    <LinearLayout-->\r\n<!--        android:layout_width=\"match_parent\"-->\r\n<!--        android:layout_height=\"wrap_content\"-->\r\n<!--        android:layout_alignBottom=\"@id/container\"-->\r\n<!--        android:layout_marginBottom=\"8dp\"-->\r\n<!--        android:gravity=\"center_horizontal\">-->\r\n\r\n<!--        &lt;!&ndash; 4개의 버튼 추가 &ndash;&gt;-->\r\n<!--        <Button-->\r\n<!--            android:id=\"@+id/btn_gil\"-->\r\n<!--            android:layout_width=\"wrap_content\"-->\r\n<!--            android:layout_height=\"wrap_content\"-->\r\n<!--            android:text=\"길음역\"-->\r\n<!--            android:textSize=\"13sp\" />-->\r\n\r\n<!--        <Button-->\r\n<!--            android:id=\"@+id/btn_gwa\"-->\r\n<!--            android:layout_width=\"wrap_content\"-->\r\n<!--            android:layout_height=\"wrap_content\"-->\r\n<!--            android:text=\"광화문역\"-->\r\n<!--            android:textSize=\"13sp\" />-->\r\n\r\n<!--        <Button-->\r\n<!--            android:id=\"@+id/btn_hon\"-->\r\n<!--            android:layout_width=\"wrap_content\"-->\r\n<!--            android:layout_height=\"wrap_content\"-->\r\n<!--            android:text=\"홍대입구역\"-->\r\n<!--            android:textSize=\"13sp\" />-->\r\n\r\n<!--        <Button-->\r\n<!--            android:id=\"@+id/btn_ddp\"-->\r\n<!--            android:layout_width=\"wrap_content\"-->\r\n<!--            android:layout_height=\"wrap_content\"-->\r\n<!--            android:text=\"동대문역사문화공원역\"-->\r\n<!--            android:textSize=\"13sp\" />-->\r\n\r\n\r\n<!--    </LinearLayout>-->\r\n\r\n\r\n</RelativeLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_main.xml	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ app/src/main/res/layout/activity_main.xml	(date 1605593570624)
+@@ -11,6 +11,10 @@
+     android:id="@+id/layout_main"
+     tools:context=".MainActivity">
+ 
++    <include
++        layout="@layout/toolbar"
++        android:id="@+id/toolbar" />
++
+     <FrameLayout
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+@@ -22,48 +26,9 @@
+             android:name="com.google.android.gms.maps.SupportMapFragment"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
++            android:layout_marginTop="56dp"
+             tools:context=".MapsActivity" />
+ 
+     </FrameLayout>
+ 
+-<!--    <LinearLayout-->
+-<!--        android:layout_width="match_parent"-->
+-<!--        android:layout_height="wrap_content"-->
+-<!--        android:layout_alignBottom="@id/container"-->
+-<!--        android:layout_marginBottom="8dp"-->
+-<!--        android:gravity="center_horizontal">-->
+-
+-<!--        &lt;!&ndash; 4개의 버튼 추가 &ndash;&gt;-->
+-<!--        <Button-->
+-<!--            android:id="@+id/btn_gil"-->
+-<!--            android:layout_width="wrap_content"-->
+-<!--            android:layout_height="wrap_content"-->
+-<!--            android:text="길음역"-->
+-<!--            android:textSize="13sp" />-->
+-
+-<!--        <Button-->
+-<!--            android:id="@+id/btn_gwa"-->
+-<!--            android:layout_width="wrap_content"-->
+-<!--            android:layout_height="wrap_content"-->
+-<!--            android:text="광화문역"-->
+-<!--            android:textSize="13sp" />-->
+-
+-<!--        <Button-->
+-<!--            android:id="@+id/btn_hon"-->
+-<!--            android:layout_width="wrap_content"-->
+-<!--            android:layout_height="wrap_content"-->
+-<!--            android:text="홍대입구역"-->
+-<!--            android:textSize="13sp" />-->
+-
+-<!--        <Button-->
+-<!--            android:id="@+id/btn_ddp"-->
+-<!--            android:layout_width="wrap_content"-->
+-<!--            android:layout_height="wrap_content"-->
+-<!--            android:text="동대문역사문화공원역"-->
+-<!--            android:textSize="13sp" />-->
+-
+-
+-<!--    </LinearLayout>-->
+-
+-
+ </RelativeLayout>
+\ No newline at end of file
+Index: build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\nbuildscript {\r\n    repositories {\r\n        google()\r\n        jcenter()\r\n    }\r\n    dependencies {\r\n        classpath \"com.android.tools.build:gradle:4.0.1\"\r\n        classpath 'com.google.gms:google-services:4.3.4'\r\n        // NOTE: Do not place your application dependencies here; they belong\r\n        // in the individual module build.gradle files\r\n    }\r\n}\r\n\r\nallprojects {\r\n    repositories {\r\n        google()\r\n        jcenter()\r\n    }\r\n}\r\n\r\ntask clean(type: Delete) {\r\n    delete rootProject.buildDir\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- build.gradle	(revision dcd2bb1ea1ea89c68c45e74b8e773e6856192fb3)
++++ build.gradle	(date 1605589426186)
+@@ -5,7 +5,7 @@
+         jcenter()
+     }
+     dependencies {
+-        classpath "com.android.tools.build:gradle:4.0.1"
++        classpath 'com.android.tools.build:gradle:4.1.0'
+         classpath 'com.google.gms:google-services:4.3.4'
+         // NOTE: Do not place your application dependencies here; they belong
+         // in the individual module build.gradle files

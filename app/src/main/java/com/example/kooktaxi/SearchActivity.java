@@ -8,6 +8,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -49,6 +51,11 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // 닉네임 가져오기
         Intent intentID = getIntent();
@@ -124,5 +131,12 @@ public class SearchActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_toolbar, menu);
+        return true;
     }
 }

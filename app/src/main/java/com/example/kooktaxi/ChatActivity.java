@@ -49,6 +49,11 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         et_send = (EditText) findViewById(R.id.et_send);
         lv_chating = (ListView) findViewById(R.id.lv_chating);
         btn_send = (Button) findViewById(R.id.btn_send);
@@ -121,6 +126,7 @@ public class ChatActivity extends AppCompatActivity {
 
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.menu1, menu);
+        menuInflater.inflate(R.menu.menu_toolbar, menu);
 
         return true;
     }

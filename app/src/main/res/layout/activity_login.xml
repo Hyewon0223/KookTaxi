@@ -6,13 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".LoginActivity">
 
+    <include
+        layout="@layout/toolbar"
+        android:id="@+id/toolbar" />
+
     <ImageView
         android:id="@+id/LogoimageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="230dp"
-        app:srcCompat="@android:drawable/sym_def_app_icon" />
+        android:layout_marginTop="180dp"
+        android:background="#FFFFFF"
+        app:srcCompat="@mipmap/kooktaxi" />
 
     <TextView
         android:id="@+id/mailTextView"
@@ -22,7 +27,9 @@
         android:layout_marginStart="85dp"
         android:layout_marginLeft="85dp"
         android:layout_marginTop="65dp"
-        android:text="Email" />
+        android:text="Email"
+        android:textSize="17dp"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/mailEditText"
@@ -45,7 +52,9 @@
         android:layout_marginStart="70dp"
         android:layout_marginLeft="70dp"
         android:layout_marginTop="50dp"
-        android:text="Password" />
+        android:text="Password"
+        android:textSize="17dp"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/pwEditText"
@@ -69,7 +78,11 @@
         android:layout_marginStart="28dp"
         android:layout_marginLeft="28dp"
         android:layout_marginBottom="20dp"
-        android:text="Login" />
+        android:background="#4CAF50"
+        android:text="Login"
+        android:textColor="#FFFFFF"
+        android:textSize="17dp"
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/Joinbutton"
@@ -80,7 +93,11 @@
         android:layout_marginLeft="10dp"
         android:layout_marginBottom="20dp"
         android:layout_toRightOf="@id/Loginbutton"
-        android:text="Join" />
+        android:background="#4CAF50"
+        android:text="Join"
+        android:textColor="#FFFFFF"
+        android:textSize="17dp"
+        android:textStyle="bold"/>
 
     <TextView
         android:id="@+id/alarmTextView"

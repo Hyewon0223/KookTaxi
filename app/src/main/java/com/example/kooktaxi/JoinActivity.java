@@ -15,6 +15,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuInflater;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -48,6 +50,11 @@ public class JoinActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join);
+
+        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         EditText IDEdit = (EditText) findViewById(R.id.IDjoinEdit);
         EditText mailEdit = (EditText) findViewById(R.id.emailjoinEdit);
@@ -129,7 +136,7 @@ public class JoinActivity extends AppCompatActivity {
                             if (info[i].equals("")) edits[i].setHint(alarm[i] + "was not filled.");
                     }
                 }
-                
+
                 else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
                 else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
                 else if (gender.equals("")) alarmtext.setText("Please check the gender.");
@@ -138,6 +145,13 @@ public class JoinActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_toolbar, menu);
+        return true;
     }
 
     public Map<String, Object> toMap(String pw, String dp, String mail, String phone, String gender) {

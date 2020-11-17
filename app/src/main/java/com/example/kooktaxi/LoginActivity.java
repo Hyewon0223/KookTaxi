@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuInflater;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -36,6 +38,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
 
         Button joinButton = (Button) findViewById(R.id.Joinbutton);
         Button loginButton = (Button) findViewById(R.id.Loginbutton);
@@ -90,5 +95,12 @@ public class LoginActivity extends AppCompatActivity {
                 else alarm.setText("Fill in the blanks, please.");
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_toolbar, menu);
+        return true;
     }
 }

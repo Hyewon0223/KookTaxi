@@ -16,6 +16,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -76,6 +78,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
+
         Intent intent = getIntent();
         mail = intent.getStringExtra("mail");
 
@@ -106,6 +111,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        });
 
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_toolbar, menu);
+        return true;
     }
 
     @Override
