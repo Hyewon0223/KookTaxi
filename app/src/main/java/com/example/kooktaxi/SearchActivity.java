@@ -55,6 +55,7 @@ public class SearchActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
         setSupportActionBar(tb);
 
+        getSupportActionBar().setTitle("길음역");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // 닉네임 가져오기

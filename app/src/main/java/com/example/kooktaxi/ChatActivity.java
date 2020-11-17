@@ -62,7 +62,7 @@ public class ChatActivity extends AppCompatActivity {
         str_user_mail = getIntent().getExtras().get("user_mail").toString();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(str_room_name); // 채팅 정보 읽어옴
 
-        setTitle(str_room_name + " 채팅방");
+        getSupportActionBar().setTitle("길음역 "+ str_room_name + " 채팅방");
 
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);
         lv_chating.setAdapter(arrayAdapter);
@@ -133,12 +133,14 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {  //보완해야함!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+        switch(item.getItemId()) {
             case R.id.item_master:
                 return true;
-            case R.id.item_user:
+            case R.id.item_matched:
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 return true;
             case R.id.item_out:
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 return true;
         }
         return false;

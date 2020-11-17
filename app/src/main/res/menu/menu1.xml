@@ -1,43 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/item_master"
-        android:title = "방장">
+        android:title = "Master">
         <menu>
             <item
-                android:id="@+id/itemCheck"
-                android:title = "">
+                android:id="@+id/check1"
+                android:title = "User1">
             </item>
             <item
-                android:id="@+id/item_user1"
-                android:title = "매칭 완료">>
+                android:id="@+id/check2"
+                android:title = "User2">
+            </item>
+            <item
+                android:id="@+id/check3"
+                android:title = "User3">
+            </item>
+            <item
+                android:id="@+id/item_matched"
+                android:title = "Match Complete">
+            </item>
+            <item
+                android:id="@+id/item_out"
+                android:title = "confirmed">
             </item>
         </menu>
     </item>
 
     <item
         android:id="@+id/item_user2"
-        android:title = "사용자">
+        android:title = "User">
         <menu>
             <item
-                android:id="@+id/item_user3"
-                android:title = "매칭 완료">>
-            </item>
-            <item
-                android:id="@+id/item_user"
-                android:title = "매칭 완료">>
+                android:id="@+id/item_usercheck"
+                android:title = "Send complete">>
             </item>
         </menu>
-    </item>
-
-    <item
-        android:id="@+id/item_out"
-        android:title = "나가기">
-    </item>
-
-    <item
-        android:id="@+id/item_matched"
-        android:title = "매칭 완료">
     </item>
 </menu>
