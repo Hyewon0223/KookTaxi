@@ -193,7 +193,7 @@ firebaseAuth.signInWithEmailAndPassword(mail,pw).addOnCompleteListener(LoginActi
     }
 });
 ~~~
-- GoogleMap을 실행하기 위해 필요한 permissiond을 String 배열에 정의
+- GoogleMap을 실행하기 위해 필요한 permission들을 String 배열에 정의
 ~~~java
 String[] REQUIRED_PERMISSIONS  = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION };
 ~~~
