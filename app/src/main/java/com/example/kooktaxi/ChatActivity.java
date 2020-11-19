@@ -53,6 +53,7 @@ public class ChatActivity extends AppCompatActivity {
     public String master_mail;
     public String[] user_list = {"", "", "",""};
     public int cnt_user = 1;
+    public boolean match = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -172,6 +173,7 @@ public class ChatActivity extends AppCompatActivity {
         MenuItem item_master = menu.findItem(R.id.item_master);
         MenuItem item_user = menu.findItem(R.id.item_user);
 
+//        방장의 기능이 사용자에게 안보여서 적용이 안되는 건가......
         if (str_user_mail.equals(master_mail)) {
             item_master.setVisible(true);
             item_user.setVisible(false);
@@ -207,6 +209,8 @@ public class ChatActivity extends AppCompatActivity {
                 return true;
             case R.id.item_matched:
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                match = true;
+                matched_func(match);
                 //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다
                 return true;
             case R.id.item_user1:
@@ -256,6 +260,14 @@ public class ChatActivity extends AppCompatActivity {
                 pay_cnt++;
         }
         return true;
+    }
+
+    public void matched_func(boolean matched){
+        if (match == true) {
+            if (Arrays.asList(user_list).contains(str_user_mail)){
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            }
+        }
     }
 
     // addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있으면,
