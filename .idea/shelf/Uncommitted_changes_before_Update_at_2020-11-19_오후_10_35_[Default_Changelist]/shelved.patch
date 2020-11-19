@@ -1,0 +1,45 @@
+Index: app/src/main/res/layout/activity_chat.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:orientation=\"vertical\">\r\n\r\n    <include\r\n        android:id=\"@+id/toolbar\"\r\n        layout=\"@layout/toolbar\" />\r\n\r\n    <ListView\r\n        android:id=\"@+id/lv_chating\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\"\r\n        android:layout_marginBottom=\"100dp\"></ListView>\r\n\r\n    <LinearLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginTop=\"-100dp\"\r\n        android:layout_marginBottom=\"50dp\">\r\n\r\n        <CheckedTextView\r\n            android:id=\"@+id/checkedTextView1\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"5dp\"\r\n            android:layout_marginLeft=\"5dp\"\r\n            android:checkMark=\"?android:attr/listChoiceIndicatorMultiple\"\r\n            android:checked=\"false\"\r\n            android:text=\"사용자1\" />\r\n\r\n        <CheckedTextView\r\n            android:id=\"@+id/checkedTextView2\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:checkMark=\"?android:attr/listChoiceIndicatorMultiple\"\r\n            android:checked=\"false\"\r\n            android:text=\"사용자2\" />\r\n\r\n        <CheckedTextView\r\n            android:id=\"@+id/checkedTextView3\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:checkMark=\"?android:attr/listChoiceIndicatorMultiple\"\r\n            android:checked=\"false\"\r\n            android:text=\"사용자3\" />\r\n\r\n        <Button\r\n            android:id=\"@+id/btn_out\"\r\n            android:layout_width=\"88dp\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"82dp\"\r\n            android:layout_marginLeft=\"82dp\"\r\n            android:background=\"#EC564B\"\r\n            android:text=\"Out\"\r\n            android:textColor=\"#FFFFFF\"\r\n            android:textSize=\"18dp\"\r\n            android:textStyle=\"bold\" />\r\n    </LinearLayout>\r\n\r\n\r\n    <LinearLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginTop=\"-50dp\"\r\n        android:orientation=\"horizontal\">\r\n\r\n        <EditText\r\n            android:id=\"@+id/et_send\"\r\n            android:layout_width=\"0dp\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_weight=\"1\"\r\n            android:privateImeOptions=\"defaultInputmode=korean\" />\r\n\r\n        <Button\r\n            android:id=\"@+id/btn_send\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:background=\"#4CAF50\"\r\n            android:text=\"send\"\r\n            android:textColor=\"#FFFFFF\"\r\n            android:textSize=\"18dp\"\r\n            android:textStyle=\"bold\" />\r\n\r\n    </LinearLayout>\r\n\r\n</LinearLayout>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_chat.xml	(revision cac659716b79d84c93ec1b5bfa2cb877115cf889)
++++ app/src/main/res/layout/activity_chat.xml	(date 1605792747324)
+@@ -18,7 +18,8 @@
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_marginTop="-100dp"
+-        android:layout_marginBottom="50dp">
++        android:layout_marginBottom="50dp"
++        android:gravity="right">
+ 
+         <CheckedTextView
+             android:id="@+id/checkedTextView1"
+@@ -42,6 +43,8 @@
+             android:id="@+id/checkedTextView3"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
++            android:layout_marginEnd="70dp"
++            android:layout_marginRight="70dp"
+             android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+             android:checked="false"
+             android:text="사용자3" />
+@@ -50,8 +53,7 @@
+             android:id="@+id/btn_out"
+             android:layout_width="88dp"
+             android:layout_height="wrap_content"
+-            android:layout_marginStart="82dp"
+-            android:layout_marginLeft="82dp"
++            android:layout_gravity="end"
+             android:background="#EC564B"
+             android:text="Out"
+             android:textColor="#FFFFFF"
+@@ -85,4 +87,4 @@
+ 
+     </LinearLayout>
+ 
+-</LinearLayout>
++</LinearLayout>
+\ No newline at end of file

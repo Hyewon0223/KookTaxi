@@ -162,6 +162,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 master_mail = snapshot.child("Email").getValue(String.class);
+                user_list[0] = master_mail;
             }
 
             @Override
@@ -203,7 +204,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu1_hj, menu);
+        getMenuInflater().inflate(R.menu.menu1, menu);
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
 
         MenuItem item_master = menu.findItem(R.id.item_master);
@@ -216,6 +217,10 @@ public class ChatActivity extends AppCompatActivity {
         else {
             item_master.setVisible(false);
             item_user.setVisible(true);
+
+            check_text1.setVisibility(View.INVISIBLE);
+            check_text2.setVisibility(View.INVISIBLE);
+            check_text3.setVisibility(View.INVISIBLE);
         }
 
         return true;
