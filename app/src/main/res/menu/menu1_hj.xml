@@ -1,88 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/toolbar" />
+    <item
+        android:id="@+id/item_master"
+        android:title = "방장">
 
-    <ListView
-        android:id="@+id/lv_chating"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="100dp"></ListView>
+        <menu>
+            <item
+                android:id="@+id/item_deposit_check"
+                android:title = "입금확인">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="-100dp"
-        android:layout_marginBottom="50dp">
+                <menu>
 
-        <CheckedTextView
-            android:id="@+id/checkedTextView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginLeft="5dp"
-            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
-            android:checked="false"
-            android:text="사용자1" />
+                    <item
+                        android:id="@+id/item_user1"
+                        android:title="사용자1">
+                    </item>
+                    <item
+                        android:id="@+id/item_user2"
+                        android:title = "사용자2">
+                    </item>
+                    <item
+                        android:id="@+id/item_user3"
+                        android:title = "사용자3">
+                    </item>
 
-        <CheckedTextView
-            android:id="@+id/checkedTextView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
-            android:checked="false"
-            android:text="사용자2" />
+                </menu>
 
-        <CheckedTextView
-            android:id="@+id/checkedTextView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
-            android:checked="false"
-            android:text="사용자3" />
+            </item>
 
-        <Button
-            android:id="@+id/btn_out"
-            android:layout_width="88dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="82dp"
-            android:layout_marginLeft="82dp"
-            android:background="#EC564B"
-            android:text="Out"
-            android:textColor="#FFFFFF"
-            android:textSize="18dp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            <item
+                android:id="@+id/item_kick"
+                android:title = "강퇴하기">
 
+                <menu>
+                    <group
+                        android:id = "@+id/checkable_group2"
+                        android:checkableBehavior = "all">
+                        <item
+                            android:id="@+id/item_user_1"
+                            android:checkable="true"
+                            android:title="사용자1">
+                        </item>
+                        <item
+                            android:id="@+id/item_user_2"
+                            android:title = "사용자2">
+                        </item>
+                        <item
+                            android:id="@+id/item_user_3"
+                            android:title = "사용자3">
+                        </item>
+                    </group>
+                </menu>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="-50dp"
-        android:orientation="horizontal">
+            </item>
+            <item
+                android:id="@+id/item_matched"
+                android:title = "매칭완료">
+            </item>
+        </menu>
 
-        <EditText
-            android:id="@+id/et_send"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:privateImeOptions="defaultInputmode=korean" />
+    </item>
 
-        <Button
-            android:id="@+id/btn_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#4CAF50"
-            android:text="send"
-            android:textColor="#FFFFFF"
-            android:textSize="18dp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-</LinearLayout>
+    <item
+        android:id="@+id/item_user"
+        android:title = "사용자">
+        <menu>
+            <item
+                android:id="@+id/item_deposit"
+                android:title="입금하기">
+            </item>
+        </menu>
+    </item>
+</menu>
