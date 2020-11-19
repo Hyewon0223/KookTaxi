@@ -31,9 +31,9 @@
         <activity
             android:name=".SearchActivity"
             android:parentActivityName=".MainActivity"/>
-        <activity android:name=".ChatActivity"/>
-<!--            툴바 뒤로가기 없앰-->
-<!--            android:parentActivityName=".SearchActivity"/>-->
+        <activity
+            android:name=".ChatActivity"
+            android:parentActivityName=".SearchActivity"/>
 
     </application>
 
