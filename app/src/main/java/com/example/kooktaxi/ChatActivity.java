@@ -7,6 +7,7 @@ package com.example.kooktaxi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,6 +64,11 @@ public class ChatActivity extends AppCompatActivity {
 
     public boolean matched = false;
 
+    public String user_cnt;
+
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference();
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -109,10 +115,6 @@ public class ChatActivity extends AppCompatActivity {
 
                 root.updateChildren(objectMap);
 
-//                System.out.println(str_user_ID); // 메일 확인용
-
-//                Toast.makeText(ChatActivity.this, cnt_user+" 인원이 있음", Toast.LENGTH_SHORT).show();
-
                 et_send.setText("");
             }
         });
@@ -126,14 +128,10 @@ public class ChatActivity extends AppCompatActivity {
                         int idx = Arrays.asList(user_list).indexOf(str_user_mail);
                         user_list[idx] = "";
                         cnt_user--;
-
-//                        Toast.makeText(ChatActivity.this, cnt_user+" 인원이 있음", Toast.LENGTH_SHORT).show();
                     }
 
                     String cnt = Integer.toString(cnt_user);
-
-                    Map<String, Object> values = toMap(cnt);
-                    databaseRef.updateChildren(values);
+                    myRef.child("ChatInfo").child(station).child(str_room_name).child("COUNT").setValue(cnt);
 
                     Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
                     intent.putExtra("mail", str_user_mail);
@@ -145,10 +143,6 @@ public class ChatActivity extends AppCompatActivity {
                         int idx = Arrays.asList(user_list).indexOf(str_user_mail);
                         user_list[idx] = "";
                         cnt_user--;
-
-//                        for (int j=0; j<user_list.length; j++){
-//                            System.out.println(user_list[j]);
-//                        }
 
                         Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
                         intent.putExtra("mail", str_user_mail);
@@ -164,6 +158,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 master_mail = snapshot.child("Email").getValue(String.class);
                 user_list[0] = master_mail;
+                user_cnt = snapshot.child("COUNT").getValue(String.class);
             }
 
             @Override
@@ -232,8 +227,11 @@ public class ChatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
             case R.id.item_matched:
+                int num = Integer.parseInt(user_cnt);
+                if(num == 4){
+                    btn_out.setVisibility(View.INVISIBLE);
+                }
                 matched = true;
-                //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다
                 return true;
             case R.id.item_user1:
                 confirm_cnt++;
@@ -304,17 +302,9 @@ public class ChatActivity extends AppCompatActivity {
             if (!Arrays.asList(user_list).contains(chat_user)) {
                 user_list[cnt_user] = chat_user;
                 cnt_user++;
-//                for (int j=0; j<user_list.length; j++){
-//                    System.out.println(user_list[j]);
-//                }
-//                if (cnt_user == 3) {
-//                    //방에 들어올 수 없도록 해야함..
-//                }
 
                 String cnt = Integer.toString(cnt_user);
-
-                Map<String, Object> values = toMap(cnt);
-                databaseRef.updateChildren(values);
+                myRef.child("ChatInfo").child(station).child(str_room_name).child("COUNT").setValue(cnt);
             }
 
             arrayAdapter.add(chat_user + " : " + chat_message);
