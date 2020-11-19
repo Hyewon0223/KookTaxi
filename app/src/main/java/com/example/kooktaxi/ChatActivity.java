@@ -80,6 +80,12 @@ public class ChatActivity extends AppCompatActivity {
         tb.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
+                if (Arrays.asList(user_list).contains(chat_user)) {
+                    int idx = Arrays.asList(user_list).indexOf(str_user_mail);
+                    user_list[idx] = "";
+                    cnt_user--;
+                }
+
                 Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
                 intent.putExtra("mail", str_user_mail);
                 intent.putExtra("station", station);
