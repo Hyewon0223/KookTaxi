@@ -17,7 +17,7 @@
 ---
 ### 개발 환경
 - Window OS
-- Android Studio 4.0 (AVD: Pixel 2 API 30 / 안드로이드 폰)
+- Android Studio 4.1.1 (AVD: Pixel 2 API 30 / 안드로이드 폰)
 ---
 ### 사용 기술
 - xml
