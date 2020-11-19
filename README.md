@@ -64,7 +64,7 @@
 </FrameLayout>
 ~~~
 #### Java
-##### LoginActivity.java, JoinActivity.java, MainActivity.java, SearchActivity.java, CharActivity.java
+##### MainActivity.java, CharActivity.java
 - 로그인의 조건이 모두 만족하면 Main 페이지로 이동 및 사용자의 정보(mail) 전달
 ~~~java
 firebaseAuth.signInWithEmailAndPassword(mail,pw).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
