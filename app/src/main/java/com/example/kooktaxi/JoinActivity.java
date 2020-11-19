@@ -43,8 +43,8 @@ public class JoinActivity extends AppCompatActivity {
     public String phone = "";
     public String gender = "";
 
-    String[] info = {Id, mail, pw, dp, phone};
-    String[] alarm = {"ID ", "Email ", "Password ", "Department ", "Phone Number "};
+    String[] info = {Id, mail, pw, dp, phone, pwCheck};
+    String[] alarm = {"ID ", "Email ", "Password ", "Department ", "Phone Number ","CheckPassword"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +63,7 @@ public class JoinActivity extends AppCompatActivity {
         EditText phoneEdit = (EditText) findViewById(R.id.phonejoinEdit);
         EditText pwCheckEdit = (EditText) findViewById(R.id.pwjoinCheckEdit);
 
-        EditText[] edits = {IDEdit,  mailEdit, pwEdit, dpEdit, phoneEdit};
+        EditText[] edits = {IDEdit,  mailEdit, pwEdit, dpEdit, phoneEdit, pwCheckEdit};
 
         RadioGroup rg = (RadioGroup) findViewById(R.id.RadioGroup);
 
@@ -109,10 +109,14 @@ public class JoinActivity extends AppCompatActivity {
                 for (int i = 0; i < info.length; i++)
                     if (info[i].equals("")) edits[i].setHint(alarm[i] + "was not filled.");
 
+                if (!Check.isChecked()) alarmtext.setText("Please check to allow personal information.");
+                if (gender.equals("")) alarmtext.setText("Please check the gender.");
+                if (Check.isChecked() && !gender.equals("")) alarmtext.setText("");
+
                 // 모든 조건 충족시
-                if (mailCheck[1].equals("kookmin.ac.kr") && pw.equals(pwCheck) && Check.isChecked() && gender != "") {
-                    if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0) {
-                        firebaseAuth.createUserWithEmailAndPassword(mail,pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {
+                if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0 && pwCheck.length() != 0 && gender != "" && Check.isChecked()) {
+                    if (mailCheck[1].equals("kookmin.ac.kr") && pw.equals(pwCheck)) {
+                        firebaseAuth.createUserWithEmailAndPassword(mail, pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 // 아이디(학번)가 중복되지 않는다면
@@ -130,19 +134,9 @@ public class JoinActivity extends AppCompatActivity {
                             }
                         });
                     }
-
-                    else { // 하나라도 조건이 충족되지 않는다면
-                        for (int i = 0; i < info.length; i++)
-                            if (info[i].equals("")) edits[i].setHint(alarm[i] + "was not filled.");
-                    }
+                    else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
+                    else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
                 }
-
-                else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
-                else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
-                else if (gender.equals("")) alarmtext.setText("Please check the gender.");
-                else if (!Check.isChecked()) alarmtext.setText("Please check to allow personal information.");
-                else alarmtext.setText("Please check the gender.");
-
             }
         });
     }

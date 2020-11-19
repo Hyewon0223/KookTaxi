@@ -1,0 +1,439 @@
+Index: app/src/main/java/com/example/kooktaxi/ChatActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n파일명: ChatActivity.java\r\n개발자 이름: 백연선, 이한정\r\n */\r\npackage com.example.kooktaxi;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.os.Handler;\r\nimport android.util.Log;\r\nimport android.view.Menu;\r\nimport android.view.MenuItem;\r\nimport android.view.View;\r\nimport android.widget.ArrayAdapter;\r\nimport android.widget.Button;\r\nimport android.widget.CheckedTextView;\r\nimport android.widget.EditText;\r\nimport android.widget.ListView;\r\nimport android.widget.Toast;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.annotation.Nullable;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.google.firebase.database.ChildEventListener;\r\nimport com.google.firebase.database.DataSnapshot;\r\nimport com.google.firebase.database.DatabaseError;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.database.ValueEventListener;\r\n\r\nimport java.io.ObjectInputStream;\r\nimport java.io.ObjectOutputStream;\r\nimport java.net.InetAddress;\r\nimport java.net.ServerSocket;\r\nimport java.net.Socket;\r\nimport java.util.ArrayList;\r\nimport java.util.Arrays;\r\nimport java.util.HashMap;\r\nimport java.util.Iterator;\r\nimport java.util.Map;\r\n\r\npublic class ChatActivity extends AppCompatActivity {\r\n    public ListView lv_chating;\r\n    private EditText et_send;\r\n    public Button btn_send;\r\n    public Button btn_out;\r\n    public CheckedTextView check_text1;\r\n    public CheckedTextView check_text2;\r\n    public CheckedTextView check_text3;\r\n    public String socketData = \"\";\r\n\r\n    private ArrayAdapter<String> arrayAdapter;\r\n    private ArrayList<String> arr_room = new ArrayList<>();\r\n\r\n    public String str_room_name;\r\n    private String str_user_mail;\r\n    private String station;\r\n\r\n    private String key;\r\n    public String chat_user;\r\n    public String chat_message;\r\n\r\n    public int confirm_cnt = 0; // 마스터가 사용자 입금 완료 확인 하는 용도\r\n    public int pay_cnt = 0; // 사용자가 입금 완료 확인하는 용도\r\n\r\n    public String master_mail;\r\n    public String[] user_list = {\"\", \"\", \"\",\"\",\"\",\"\",\"\",\"\",\"\"};\r\n    public int cnt_user = 1;\r\n\r\n    public boolean matched = false;\r\n\r\n    Handler handler = new Handler();\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState){\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_chat);\r\n\r\n        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);\r\n        setSupportActionBar(tb);\r\n\r\n        et_send = (EditText) findViewById(R.id.et_send);\r\n        lv_chating = (ListView) findViewById(R.id.lv_chating);\r\n        btn_send = (Button) findViewById(R.id.btn_send);\r\n        btn_out = (Button) findViewById(R.id.btn_out);\r\n\r\n        check_text1 = (CheckedTextView) findViewById(R.id.checkedTextView1);\r\n        check_text2 = (CheckedTextView) findViewById(R.id.checkedTextView2);\r\n        check_text3 = (CheckedTextView) findViewById(R.id.checkedTextView3);\r\n\r\n        str_room_name = getIntent().getExtras().get(\"room_name\").toString();\r\n        str_user_mail = getIntent().getExtras().get(\"user_mail\").toString();\r\n        station = getIntent().getExtras().get(\"station\").toString();\r\n\r\n        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child(\"ChatInfo\").child(station).child(str_room_name); // 채팅 정보 읽어옴\r\n\r\n        getSupportActionBar().setTitle(station +\" \"+ str_room_name + \" 채팅방\");\r\n\r\n        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);\r\n        lv_chating.setAdapter(arrayAdapter);\r\n        //리스트뷰가 갱신될 때 하단으로 자동 스크롤\r\n        lv_chating.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);\r\n\r\n        btn_send.setOnClickListener(new View.OnClickListener(){\r\n            @Override\r\n            public void onClick(View view) {\r\n                //map을 사용해 name과 메시지를 가져오고, key에 값 요청\r\n                Map<String, Object> map = new HashMap<String, Object>();\r\n                key = reference.push().getKey();\r\n\r\n                DatabaseReference root = reference.child(key);\r\n\r\n                //updateChildren를 호출하여 database 최종 업데이트\r\n                Map<String, Object> objectMap = new HashMap<String, Object>();\r\n                objectMap.put(\"name\", str_user_mail);\r\n                objectMap.put(\"message\", et_send.getText().toString());\r\n\r\n                root.updateChildren(objectMap);\r\n\r\n//                System.out.println(str_user_ID); // 메일 확인용\r\n\r\n                et_send.setText(\"\");\r\n            }\r\n        });\r\n\r\n        btn_out.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                if (matched == false) {\r\n                    if (Arrays.asList(user_list).contains(chat_user)) {\r\n                        int idx = Arrays.asList(user_list).indexOf(str_user_mail);\r\n                        user_list[idx] = \"\";\r\n                        cnt_user--;\r\n                    }\r\n\r\n                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);\r\n                    intent.putExtra(\"mail\", str_user_mail);\r\n                    intent.putExtra(\"station\", station);\r\n                    startActivity(intent);\r\n                }\r\n                else {\r\n                    if (confirm_cnt == cnt_user & pay_cnt == cnt_user){\r\n                        int idx = Arrays.asList(user_list).indexOf(str_user_mail);\r\n                        user_list[idx] = \"\";\r\n                        cnt_user--;\r\n\r\n                        for (int j=0; j<user_list.length; j++){\r\n                            System.out.println(user_list[j]);\r\n                        }\r\n\r\n                        Intent intent = new Intent(ChatActivity.this, SearchActivity.class);\r\n                        intent.putExtra(\"mail\", str_user_mail);\r\n                        intent.putExtra(\"station\", station);\r\n                        startActivity(intent);\r\n                    }\r\n                }\r\n            }\r\n        });\r\n\r\n        reference.addValueEventListener(new ValueEventListener() {\r\n            @Override\r\n            public void onDataChange(@NonNull DataSnapshot snapshot) {\r\n                master_mail = snapshot.child(\"Email\").getValue(String.class);\r\n                user_list[0] = master_mail;\r\n            }\r\n\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError error) {\r\n\r\n            }\r\n        });\r\n\r\n        reference.addChildEventListener(new ChildEventListener() {\r\n            @Override\r\n            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n                chatConversation(dataSnapshot);\r\n            }\r\n\r\n            @Override\r\n            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n                chatConversation(dataSnapshot);\r\n            }\r\n\r\n            @Override\r\n            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {\r\n\r\n            }\r\n\r\n            @Override\r\n            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {\r\n\r\n            }\r\n\r\n            @Override\r\n            public void onCancelled(@NonNull DatabaseError databaseError) {\r\n\r\n            }\r\n        });\r\n\r\n    }\r\n\r\n    //메뉴 자바 코드\r\n    @Override\r\n    public boolean onCreateOptionsMenu(Menu menu) {\r\n        super.onCreateOptionsMenu(menu);\r\n        getMenuInflater().inflate(R.menu.menu1, menu);\r\n        getMenuInflater().inflate(R.menu.menu_toolbar, menu);\r\n\r\n        MenuItem item_master = menu.findItem(R.id.item_master);\r\n        MenuItem item_user = menu.findItem(R.id.item_user);\r\n\r\n        if (str_user_mail.equals(master_mail)) {\r\n            item_master.setVisible(true);\r\n            item_user.setVisible(false);\r\n        }\r\n        else {\r\n            item_master.setVisible(false);\r\n            item_user.setVisible(true);\r\n\r\n            check_text1.setVisibility(View.INVISIBLE);\r\n            check_text2.setVisibility(View.INVISIBLE);\r\n            check_text3.setVisibility(View.INVISIBLE);\r\n        }\r\n\r\n        return true;\r\n    }\r\n\r\n\r\n    @Override\r\n    public boolean onOptionsItemSelected(@NonNull MenuItem item) {\r\n        switch(item.getItemId()) {\r\n            case R.id.item_matched:\r\n\r\n                //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다\r\n                new Thread(new Runnable() {\r\n                    @Override\r\n                    public void run() {\r\n                        startServer();\r\n                        send(\"매칭완료\");\r\n                    }\r\n                }).start();\r\n\r\n                System.out.println(socketData);\r\n\r\n                if (socketData.equals(\"매칭완료\")){\r\n                    btn_out.setVisibility(View.INVISIBLE);\r\n                }\r\n\r\n                return true;\r\n            case R.id.item_user1:\r\n                confirm_cnt++;\r\n                check_text1.setChecked(true);\r\n                return true;\r\n            case R.id.item_user2:\r\n                confirm_cnt++;\r\n                check_text2.setChecked(true);\r\n                return true;\r\n            case R.id.item_user3:\r\n                confirm_cnt++;\r\n                check_text3.setChecked(true);\r\n                return true;\r\n            // 강퇴하기\r\n            case R.id.item_user_1:\r\n                int user_idx = Arrays.asList(user_list).indexOf(str_user_mail);\r\n                if (user_idx == 1) {\r\n                    user_list[user_idx] = \"\";\r\n                    cnt_user--;\r\n\r\n                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);\r\n                    intent.putExtra(\"mail\", str_user_mail);\r\n                    intent.putExtra(\"station\", station);\r\n                    startActivity(intent);\r\n                }\r\n                return true;\r\n            case R.id.item_user_2:\r\n                int user_idx2 = Arrays.asList(user_list).indexOf(str_user_mail);\r\n                if (user_idx2 == 2) {\r\n                    user_list[user_idx2] = \"\";\r\n                    cnt_user--;\r\n\r\n                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);\r\n                    intent.putExtra(\"mail\", str_user_mail);\r\n                    intent.putExtra(\"station\", station);\r\n                    startActivity(intent);\r\n                }\r\n                return true;\r\n            case R.id.item_user_3:\r\n                int user_idx3 = Arrays.asList(user_list).indexOf(str_user_mail);\r\n                if (user_idx3 == 3) {\r\n                    user_list[user_idx3] = \"\";\r\n                    cnt_user--;\r\n\r\n                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);\r\n                    intent.putExtra(\"mail\", str_user_mail);\r\n                    intent.putExtra(\"station\", station);\r\n                    startActivity(intent);\r\n                }\r\n                return true;\r\n            case R.id.item_deposit:\r\n                pay_cnt++;\r\n                return true;\r\n        }\r\n        return true;\r\n    }\r\n\r\n    // addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있으면,\r\n    // 화면에 보여지고 있는 Listview의 값을 갱신함\r\n    private void chatConversation(DataSnapshot dataSnapshot) {\r\n        Iterator i = dataSnapshot.getChildren().iterator();\r\n\r\n        while(i.hasNext()) {\r\n            chat_message = (String) ((DataSnapshot) i.next()).getValue();\r\n            chat_user = (String) ((DataSnapshot) i.next()).getValue();\r\n\r\n            if (!Arrays.asList(user_list).contains(chat_user)) {\r\n                user_list[cnt_user] = chat_user;\r\n                cnt_user++;\r\n                for (int j=0; j<user_list.length; j++){\r\n                    System.out.println(user_list[j]);\r\n                }\r\n//                if (cnt_user == 3) {\r\n//                    //방에 들어올 수 없도록 해야함..\r\n//                }\r\n            }\r\n\r\n            arrayAdapter.add(chat_user + \" : \" + chat_message);\r\n        }\r\n\r\n        arrayAdapter.notifyDataSetChanged();\r\n    }\r\n\r\n    public void send(String data) {\r\n        try {\r\n            int portNumber = 5001;\r\n            Socket sock = new Socket(\"localhost\", portNumber);\r\n            printClientLog(\"소켓 연결함.\");\r\n\r\n            ObjectOutputStream outstream = new ObjectOutputStream(sock.getOutputStream());\r\n            outstream.writeObject(data);\r\n            outstream.flush();\r\n            printClientLog(\"데이터 전송함.\");\r\n\r\n            ObjectInputStream instream = new ObjectInputStream(sock.getInputStream());\r\n            printClientLog(\"서버로부터 받음 : \" + instream.readObject());\r\n\r\n            socketData = data;\r\n            sock.close();\r\n        } catch(Exception ex) {\r\n            ex.printStackTrace();\r\n        }\r\n    }\r\n\r\n    public void startServer() {\r\n        try {\r\n            int portNumber = 5001;\r\n\r\n            ServerSocket server = new ServerSocket(portNumber);\r\n            printServerLog(\"서버 시작함 : \" + portNumber);\r\n\r\n            while(true) {\r\n                Socket sock = server.accept();\r\n                InetAddress clientHost = sock.getLocalAddress();\r\n                int clientPort = sock.getPort();\r\n                printServerLog(\"클라이언트 연결됨 : \" + clientHost + \" : \" + clientPort);\r\n\r\n                ObjectInputStream instream = new ObjectInputStream(sock.getInputStream());\r\n                Object obj = instream.readObject();\r\n                printServerLog(\"데이터 받음 : \" + obj);\r\n\r\n                ObjectOutputStream outstream = new ObjectOutputStream(sock.getOutputStream());\r\n                outstream.writeObject(obj + \" from Server.\");\r\n                outstream.flush();\r\n                printServerLog(\"데이터 보냄.\");\r\n\r\n                sock.close();\r\n            }\r\n        } catch(Exception ex) {\r\n            ex.printStackTrace();\r\n        }\r\n    }\r\n\r\n    public void printClientLog(final String data) {\r\n        Log.d(\"ChatActivity\", data);\r\n\r\n        handler.post(new Runnable() {\r\n            @Override\r\n            public void run() {\r\n                Toast.makeText(ChatActivity.this, data, Toast.LENGTH_LONG).show();\r\n            }\r\n        });\r\n\r\n    }\r\n\r\n    public void printServerLog(final String data) {\r\n        Log.d(\"MainActivity\", data);\r\n\r\n        handler.post(new Runnable() {\r\n            @Override\r\n            public void run() {\r\n                Toast.makeText(ChatActivity.this, data, Toast.LENGTH_LONG).show();\r\n            }\r\n        });\r\n    }\r\n}\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/ChatActivity.java	(revision a71e8a48b397d55f5aa4bf23f7a09926ec55e1f9)
++++ app/src/main/java/com/example/kooktaxi/ChatActivity.java	(date 1605808916111)
+@@ -6,8 +6,6 @@
+ 
+ import android.content.Intent;
+ import android.os.Bundle;
+-import android.os.Handler;
+-import android.util.Log;
+ import android.view.Menu;
+ import android.view.MenuItem;
+ import android.view.View;
+@@ -16,7 +14,6 @@
+ import android.widget.CheckedTextView;
+ import android.widget.EditText;
+ import android.widget.ListView;
+-import android.widget.Toast;
+ 
+ import androidx.annotation.NonNull;
+ import androidx.annotation.Nullable;
+@@ -29,16 +26,11 @@
+ import com.google.firebase.database.FirebaseDatabase;
+ import com.google.firebase.database.ValueEventListener;
+ 
+-import java.io.ObjectInputStream;
+-import java.io.ObjectOutputStream;
+-import java.net.InetAddress;
+-import java.net.ServerSocket;
+-import java.net.Socket;
+ import java.util.ArrayList;
+-import java.util.Arrays;
+ import java.util.HashMap;
+ import java.util.Iterator;
+ import java.util.Map;
++import java.util.Vector;
+ 
+ public class ChatActivity extends AppCompatActivity {
+     public ListView lv_chating;
+@@ -48,7 +40,6 @@
+     public CheckedTextView check_text1;
+     public CheckedTextView check_text2;
+     public CheckedTextView check_text3;
+-    public String socketData = "";
+ 
+     private ArrayAdapter<String> arrayAdapter;
+     private ArrayList<String> arr_room = new ArrayList<>();
+@@ -65,13 +56,11 @@
+     public int pay_cnt = 0; // 사용자가 입금 완료 확인하는 용도
+ 
+     public String master_mail;
+-    public String[] user_list = {"", "", "","","","","","",""};
++    public Vector<String> user_list = new Vector<String>();
+     public int cnt_user = 1;
+ 
+     public boolean matched = false;
+ 
+-    Handler handler = new Handler();
+-
+     @Override
+     protected void onCreate(Bundle savedInstanceState){
+         super.onCreate(savedInstanceState);
+@@ -120,6 +109,8 @@
+ 
+ //                System.out.println(str_user_ID); // 메일 확인용
+ 
++//                Toast.makeText(ChatActivity.this, cnt_user+" 인원이 있음", Toast.LENGTH_SHORT).show();
++
+                 et_send.setText("");
+             }
+         });
+@@ -127,12 +118,20 @@
+         btn_out.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View view) {
++                DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(station).child(str_room_name);
+                 if (matched == false) {
+-                    if (Arrays.asList(user_list).contains(chat_user)) {
+-                        int idx = Arrays.asList(user_list).indexOf(str_user_mail);
+-                        user_list[idx] = "";
++                    if (user_list.contains(str_user_mail)) {
++                        user_list.remove(str_user_mail);
+                         cnt_user--;
++                        System.out.println(cnt_user);
++
++//                        Toast.makeText(ChatActivity.this, cnt_user+" 인원이 있음", Toast.LENGTH_SHORT).show();
+                     }
++
++                    String cnt = Integer.toString(cnt_user);
++
++                    Map<String, Object> values = toMap(cnt);
++                    databaseRef.updateChildren(values);
+ 
+                     Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                     intent.putExtra("mail", str_user_mail);
+@@ -141,13 +140,13 @@
+                 }
+                 else {
+                     if (confirm_cnt == cnt_user & pay_cnt == cnt_user){
+-                        int idx = Arrays.asList(user_list).indexOf(str_user_mail);
+-                        user_list[idx] = "";
++//                        int idx = user_list.indexOf(str_user_mail);
++                        user_list.remove(str_user_mail);
+                         cnt_user--;
+ 
+-                        for (int j=0; j<user_list.length; j++){
+-                            System.out.println(user_list[j]);
+-                        }
++//                        for (int j=0; j<user_list.length; j++){
++//                            System.out.println(user_list[j]);
++//                        }
+ 
+                         Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                         intent.putExtra("mail", str_user_mail);
+@@ -162,7 +161,8 @@
+             @Override
+             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                 master_mail = snapshot.child("Email").getValue(String.class);
+-                user_list[0] = master_mail;
++//                user_list[0] = master_mail;
++                user_list.add(master_mail);
+             }
+ 
+             @Override
+@@ -231,22 +231,8 @@
+     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+         switch(item.getItemId()) {
+             case R.id.item_matched:
+-
++                matched = true;
+                 //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다
+-                new Thread(new Runnable() {
+-                    @Override
+-                    public void run() {
+-                        startServer();
+-                        send("매칭완료");
+-                    }
+-                }).start();
+-
+-                System.out.println(socketData);
+-
+-                if (socketData.equals("매칭완료")){
+-                    btn_out.setVisibility(View.INVISIBLE);
+-                }
+-
+                 return true;
+             case R.id.item_user1:
+                 confirm_cnt++;
+@@ -261,42 +247,45 @@
+                 check_text3.setChecked(true);
+                 return true;
+             // 강퇴하기
+-            case R.id.item_user_1:
+-                int user_idx = Arrays.asList(user_list).indexOf(str_user_mail);
+-                if (user_idx == 1) {
+-                    user_list[user_idx] = "";
+-                    cnt_user--;
+-
+-                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+-                    intent.putExtra("mail", str_user_mail);
+-                    intent.putExtra("station", station);
+-                    startActivity(intent);
+-                }
+-                return true;
+-            case R.id.item_user_2:
+-                int user_idx2 = Arrays.asList(user_list).indexOf(str_user_mail);
+-                if (user_idx2 == 2) {
+-                    user_list[user_idx2] = "";
+-                    cnt_user--;
+-
+-                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+-                    intent.putExtra("mail", str_user_mail);
+-                    intent.putExtra("station", station);
+-                    startActivity(intent);
+-                }
+-                return true;
+-            case R.id.item_user_3:
+-                int user_idx3 = Arrays.asList(user_list).indexOf(str_user_mail);
+-                if (user_idx3 == 3) {
+-                    user_list[user_idx3] = "";
+-                    cnt_user--;
+-
+-                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+-                    intent.putExtra("mail", str_user_mail);
+-                    intent.putExtra("station", station);
+-                    startActivity(intent);
+-                }
+-                return true;
++//            case R.id.item_user_1:
++//                int user_idx = Arrays.asList(user_list).indexOf(str_user_mail);
++//                if (user_idx == 1) {
++////                    user_list[user_idx] = "";
++//                    user_list.remove(str_user_mail);
++//                    cnt_user--;
++//
++//                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
++//                    intent.putExtra("mail", str_user_mail);
++//                    intent.putExtra("station", station);
++//                    startActivity(intent);
++//                }
++//                return true;
++//            case R.id.item_user_2:
++//                int user_idx2 = Arrays.asList(user_list).indexOf(str_user_mail);
++//                if (user_idx2 == 2) {
++////                    user_list[user_idx2] = "";
++//                    user_list.remove(str_user_mail);
++//                    cnt_user--;
++//
++//                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
++//                    intent.putExtra("mail", str_user_mail);
++//                    intent.putExtra("station", station);
++//                    startActivity(intent);
++//                }
++//                return true;
++//            case R.id.item_user_3:
++//                int user_idx3 = Arrays.asList(user_list).indexOf(str_user_mail);
++//                if (user_idx3 == 3) {
++////                    user_list[user_idx3] = "";
++//                    user_list.remove(str_user_mail);
++//                    cnt_user--;
++//
++//                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
++//                    intent.putExtra("mail", str_user_mail);
++//                    intent.putExtra("station", station);
++//                    startActivity(intent);
++//                }
++//                return true;
+             case R.id.item_deposit:
+                 pay_cnt++;
+                 return true;
+@@ -308,20 +297,27 @@
+     // 화면에 보여지고 있는 Listview의 값을 갱신함
+     private void chatConversation(DataSnapshot dataSnapshot) {
+         Iterator i = dataSnapshot.getChildren().iterator();
++        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(station).child(str_room_name);
+ 
+         while(i.hasNext()) {
+             chat_message = (String) ((DataSnapshot) i.next()).getValue();
+             chat_user = (String) ((DataSnapshot) i.next()).getValue();
+ 
+-            if (!Arrays.asList(user_list).contains(chat_user)) {
+-                user_list[cnt_user] = chat_user;
++            if (!user_list.contains(chat_user)) {
++                user_list.add(cnt_user,chat_user);
+                 cnt_user++;
+-                for (int j=0; j<user_list.length; j++){
+-                    System.out.println(user_list[j]);
++                for (int j=0; j<user_list.size(); j++){
++                    System.out.println(user_list.get(j));
+                 }
++                System.out.println(cnt_user);
+ //                if (cnt_user == 3) {
+ //                    //방에 들어올 수 없도록 해야함..
+ //                }
++
++                String cnt = Integer.toString(cnt_user);
++
++                Map<String, Object> values = toMap(cnt);
++                databaseRef.updateChildren(values);
+             }
+ 
+             arrayAdapter.add(chat_user + " : " + chat_message);
+@@ -330,78 +326,11 @@
+         arrayAdapter.notifyDataSetChanged();
+     }
+ 
+-    public void send(String data) {
+-        try {
+-            int portNumber = 5001;
+-            Socket sock = new Socket("localhost", portNumber);
+-            printClientLog("소켓 연결함.");
+-
+-            ObjectOutputStream outstream = new ObjectOutputStream(sock.getOutputStream());
+-            outstream.writeObject(data);
+-            outstream.flush();
+-            printClientLog("데이터 전송함.");
+-
+-            ObjectInputStream instream = new ObjectInputStream(sock.getInputStream());
+-            printClientLog("서버로부터 받음 : " + instream.readObject());
+-
+-            socketData = data;
+-            sock.close();
+-        } catch(Exception ex) {
+-            ex.printStackTrace();
+-        }
+-    }
+-
+-    public void startServer() {
+-        try {
+-            int portNumber = 5001;
+-
+-            ServerSocket server = new ServerSocket(portNumber);
+-            printServerLog("서버 시작함 : " + portNumber);
+-
+-            while(true) {
+-                Socket sock = server.accept();
+-                InetAddress clientHost = sock.getLocalAddress();
+-                int clientPort = sock.getPort();
+-                printServerLog("클라이언트 연결됨 : " + clientHost + " : " + clientPort);
+-
+-                ObjectInputStream instream = new ObjectInputStream(sock.getInputStream());
+-                Object obj = instream.readObject();
+-                printServerLog("데이터 받음 : " + obj);
++    public Map<String, Object> toMap(String cnt) {
++        HashMap<String, Object> result = new HashMap<>();
+ 
+-                ObjectOutputStream outstream = new ObjectOutputStream(sock.getOutputStream());
+-                outstream.writeObject(obj + " from Server.");
+-                outstream.flush();
+-                printServerLog("데이터 보냄.");
++        result.put("cnt", cnt);
+ 
+-                sock.close();
+-            }
+-        } catch(Exception ex) {
+-            ex.printStackTrace();
+-        }
++        return result;
+     }
+-
+-    public void printClientLog(final String data) {
+-        Log.d("ChatActivity", data);
+-
+-        handler.post(new Runnable() {
+-            @Override
+-            public void run() {
+-                Toast.makeText(ChatActivity.this, data, Toast.LENGTH_LONG).show();
+-            }
+-        });
+-
+-    }
+-
+-    public void printServerLog(final String data) {
+-        Log.d("MainActivity", data);
+-
+-        handler.post(new Runnable() {
+-            @Override
+-            public void run() {
+-                Toast.makeText(ChatActivity.this, data, Toast.LENGTH_LONG).show();
+-            }
+-        });
+-    }
+-}
+-
+-
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/kooktaxi/JoinActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n파일명: JoinActivity.java\r\n개발자 이름: 조나영, 최혜원\r\n */\r\npackage com.example.kooktaxi;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.view.View;\r\nimport android.widget.Button;\r\nimport android.widget.CheckBox;\r\nimport android.widget.EditText;\r\nimport android.widget.RadioGroup;\r\nimport android.widget.TextView;\r\nimport android.view.Menu;\r\nimport android.view.MenuInflater;\r\n\r\nimport com.google.android.gms.tasks.OnCompleteListener;\r\nimport com.google.android.gms.tasks.Task;\r\nimport com.google.firebase.auth.AuthResult;\r\nimport com.google.firebase.database.DatabaseReference;\r\nimport com.google.firebase.database.FirebaseDatabase;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\n\r\nimport java.util.Dictionary;\r\nimport java.util.HashMap;\r\nimport java.util.Map;\r\nimport java.util.regex.Pattern;\r\n\r\npublic class JoinActivity extends AppCompatActivity {\r\n    private FirebaseAuth firebaseAuth;\r\n\r\n    private static final Pattern PASSWORD_PATTERN = Pattern.compile(\"^[a-zA-Z0-9!@.#$%^&*?_~]{4,16}$\");\r\n\r\n    public String Id = \"\";\r\n    public String mail = \"\";\r\n    public String pw = \"\";\r\n    public String pwCheck = \"\";\r\n    public String dp = \"\";\r\n    public String phone = \"\";\r\n    public String gender = \"\";\r\n\r\n    String[] info = {Id, mail, pw, dp, phone};\r\n    String[] alarm = {\"ID \", \"Email \", \"Password \", \"Department \", \"Phone Number \"};\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_join);\r\n\r\n        androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);\r\n        setSupportActionBar(tb);\r\n\r\n        getSupportActionBar().setDisplayHomeAsUpEnabled(true);\r\n\r\n        EditText IDEdit = (EditText) findViewById(R.id.IDjoinEdit);\r\n        EditText mailEdit = (EditText) findViewById(R.id.emailjoinEdit);\r\n        EditText pwEdit = (EditText) findViewById(R.id.PwjoinEdit);\r\n        EditText dpEdit = (EditText) findViewById(R.id.dpjoinEdit);\r\n        EditText phoneEdit = (EditText) findViewById(R.id.phonejoinEdit);\r\n        EditText pwCheckEdit = (EditText) findViewById(R.id.pwjoinCheckEdit);\r\n\r\n        EditText[] edits = {IDEdit,  mailEdit, pwEdit, dpEdit, phoneEdit};\r\n\r\n        RadioGroup rg = (RadioGroup) findViewById(R.id.RadioGroup);\r\n\r\n        rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {\r\n            @Override\r\n            public void onCheckedChanged(RadioGroup group, int checkedId) {\r\n                if (checkedId == R.id.maleButton) gender = \"male\";\r\n                else if (checkedId == R.id.femaleButton) gender = \"female\";\r\n            }\r\n        });\r\n\r\n        CheckBox Check = (CheckBox) findViewById(R.id.check);\r\n        TextView alarmtext = (TextView) findViewById(R.id.alarmText);\r\n\r\n        Button joinButton = (Button) findViewById(R.id.joinButton);\r\n\r\n        // Firebase 설정\r\n        FirebaseDatabase database = FirebaseDatabase.getInstance();\r\n        DatabaseReference myRef = database.getReference();\r\n        firebaseAuth = FirebaseAuth.getInstance();\r\n\r\n        // joinButton을 클릭했을 때\r\n        joinButton.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View v) {\r\n                // 모든 입력 값들을 String으로 각각의 변수에 저장\r\n                Id = IDEdit.getText().toString();\r\n                mail = mailEdit.getText().toString();\r\n                pw = pwEdit.getText().toString();\r\n                pwCheck = pwCheckEdit.getText().toString();\r\n                dp = dpEdit.getText().toString();\r\n                phone = phoneEdit.getText().toString();\r\n\r\n                // mail = \"123456@kookmin.ac.kr\r\n                // mailCheck 배열에 '@'를 기준으로 분리해 저장\r\n                String mailCheck[] = mail.split(\"@\");\r\n\r\n                //password 양식에 적합한지 검사\r\n                for (int i = 1; i < 2; i++)\r\n                    if (!PASSWORD_PATTERN.matcher(info[i]).matches()) edits[i].setHint(\"Please adjust the format.\");\r\n\r\n                //빈 칸이 있는지 확인\r\n                for (int i = 0; i < info.length; i++)\r\n                    if (info[i].equals(\"\")) edits[i].setHint(alarm[i] + \"was not filled.\");\r\n\r\n                // 모든 조건 충족시\r\n                if (mailCheck[1].equals(\"kookmin.ac.kr\") && pw.equals(pwCheck) && Check.isChecked() && gender != \"\") {\r\n                    if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0) {\r\n                        firebaseAuth.createUserWithEmailAndPassword(mail,pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {\r\n                            @Override\r\n                            public void onComplete(@NonNull Task<AuthResult> task) {\r\n                                // 아이디(학번)가 중복되지 않는다면\r\n                                if (task.isSuccessful()) {\r\n                                    // Map을 이용해 정보 저장\r\n                                    Map<String, Object> values = toMap(pw, dp, mail, phone, gender);\r\n\r\n                                    myRef.child(\"UserInfo\").child(Id).updateChildren(values);\r\n                                    // 회원가입 화면에서 로그인 화면으로 이동\r\n                                    Intent it = new Intent(JoinActivity.this, LoginActivity.class);\r\n                                    startActivity(it);\r\n                                }\r\n                                // 아이디(학번) 중복\r\n                                else alarmtext.setText(\"ID is already existed.\");\r\n                            }\r\n                        });\r\n                    }\r\n\r\n                    else { // 하나라도 조건이 충족되지 않는다면\r\n                        for (int i = 0; i < info.length; i++)\r\n                            if (info[i].equals(\"\")) edits[i].setHint(alarm[i] + \"was not filled.\");\r\n                    }\r\n                }\r\n\r\n                else if (!pw.equals(pwCheck)) alarmtext.setText(\"Please check the password.\");\r\n                else if (!mailCheck[1].equals(\"kookmin.ac.kr\")) alarmtext.setText(\"Please check the email.\");\r\n                else if (gender.equals(\"\")) alarmtext.setText(\"Please check the gender.\");\r\n                else if (!Check.isChecked()) alarmtext.setText(\"Please check to allow personal information.\");\r\n                else alarmtext.setText(\"Please check the gender.\");\r\n\r\n            }\r\n        });\r\n    }\r\n\r\n    @Override\r\n    public boolean onCreateOptionsMenu(Menu menu){\r\n        MenuInflater menuInflater = getMenuInflater();\r\n        menuInflater.inflate(R.menu.menu_toolbar, menu);\r\n        return true;\r\n    }\r\n\r\n    public Map<String, Object> toMap(String pw, String dp, String mail, String phone, String gender) {\r\n        HashMap<String, Object> result = new HashMap<>();\r\n\r\n        result.put(\"Password\", pw);\r\n        result.put(\"Department\", dp);\r\n        result.put(\"Email\", mail);\r\n        result.put(\"Phone Number\", phone);\r\n        result.put(\"Gender\", gender);\r\n\r\n        return result;\r\n    }\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/kooktaxi/JoinActivity.java	(revision a71e8a48b397d55f5aa4bf23f7a09926ec55e1f9)
++++ app/src/main/java/com/example/kooktaxi/JoinActivity.java	(date 1605810574207)
+@@ -43,8 +43,8 @@
+     public String phone = "";
+     public String gender = "";
+ 
+-    String[] info = {Id, mail, pw, dp, phone};
+-    String[] alarm = {"ID ", "Email ", "Password ", "Department ", "Phone Number "};
++    String[] info = {Id, mail, pw, dp, phone, pwCheck};
++    String[] alarm = {"ID ", "Email ", "Password ", "Department ", "Phone Number ","CheckPassword"};
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -63,7 +63,7 @@
+         EditText phoneEdit = (EditText) findViewById(R.id.phonejoinEdit);
+         EditText pwCheckEdit = (EditText) findViewById(R.id.pwjoinCheckEdit);
+ 
+-        EditText[] edits = {IDEdit,  mailEdit, pwEdit, dpEdit, phoneEdit};
++        EditText[] edits = {IDEdit,  mailEdit, pwEdit, dpEdit, phoneEdit, pwCheckEdit};
+ 
+         RadioGroup rg = (RadioGroup) findViewById(R.id.RadioGroup);
+ 
+@@ -109,10 +109,14 @@
+                 for (int i = 0; i < info.length; i++)
+                     if (info[i].equals("")) edits[i].setHint(alarm[i] + "was not filled.");
+ 
++                if (!Check.isChecked()) alarmtext.setText("Please check to allow personal information.");
++                if (gender.equals("")) alarmtext.setText("Please check the gender.");
++                if (Check.isChecked() && !gender.equals("")) alarmtext.setText("");
++
+                 // 모든 조건 충족시
+-                if (mailCheck[1].equals("kookmin.ac.kr") && pw.equals(pwCheck) && Check.isChecked() && gender != "") {
+-                    if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0) {
+-                        firebaseAuth.createUserWithEmailAndPassword(mail,pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {
++                if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0 && pwCheck.length() != 0 && gender != "" && Check.isChecked()) {
++                    if (mailCheck[1].equals("kookmin.ac.kr") && pw.equals(pwCheck)) {
++                        firebaseAuth.createUserWithEmailAndPassword(mail, pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {
+                             @Override
+                             public void onComplete(@NonNull Task<AuthResult> task) {
+                                 // 아이디(학번)가 중복되지 않는다면
+@@ -130,19 +134,9 @@
+                             }
+                         });
+                     }
+-
+-                    else { // 하나라도 조건이 충족되지 않는다면
+-                        for (int i = 0; i < info.length; i++)
+-                            if (info[i].equals("")) edits[i].setHint(alarm[i] + "was not filled.");
+-                    }
+-                }
+-
+-                else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
+-                else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
+-                else if (gender.equals("")) alarmtext.setText("Please check the gender.");
+-                else if (!Check.isChecked()) alarmtext.setText("Please check to allow personal information.");
+-                else alarmtext.setText("Please check the gender.");
+-
++                    else if (!pw.equals(pwCheck)) alarmtext.setText("Please check the password.");
++                    else if (!mailCheck[1].equals("kookmin.ac.kr")) alarmtext.setText("Please check the email.");
++                }
+             }
+         });
+     }
+Index: app/src/main/res/layout/activity_join.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".JoinActivity\">\r\n    \r\n\r\n    <include\r\n        layout=\"@layout/toolbar\"\r\n        android:id=\"@+id/toolbar\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/IDjoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginStart=\"63dp\"\r\n        android:layout_marginLeft=\"48dp\"\r\n        android:layout_marginTop=\"100dp\"\r\n        android:textSize=\"17dp\"\r\n        android:textStyle=\"bold\"\r\n        android:text=\"ID\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/IDjoinEdit\"\r\n        android:layout_width=\"285dp\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginStart=\"50dp\"\r\n        android:layout_marginLeft=\"47dp\"\r\n        android:layout_marginTop=\"90dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/IDjoinText\"\r\n        android:hint=\"\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/pwjoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/IDjoinText\"\r\n        android:layout_marginStart=\"32dp\"\r\n        android:layout_marginLeft=\"20dp\"\r\n        android:layout_marginTop=\"30dp\"\r\n        android:textSize=\"17dp\"\r\n        android:textStyle=\"bold\"\r\n        android:text=\"Password\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/PwjoinEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/IDjoinEdit\"\r\n        android:layout_marginStart=\"22dp\"\r\n        android:layout_marginLeft=\"23dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/pwjoinText\"\r\n        android:ems=\"10\"\r\n        android:hint=\"\"\r\n        android:inputType=\"textPassword\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/dpjoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/pwjoinCheckText\"\r\n        android:layout_marginStart=\"25dp\"\r\n        android:layout_marginLeft=\"15dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:textSize=\"17dp\"\r\n        android:textStyle=\"bold\"\r\n        android:text=\"Department\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/pwjoinCheckEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@+id/PwjoinEdit\"\r\n        android:layout_marginStart=\"5dp\"\r\n        android:layout_marginLeft=\"5dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toEndOf=\"@+id/pwjoinCheckText\"\r\n        android:layout_toRightOf=\"@+id/pwjoinCheckText\"\r\n        android:ems=\"10\"\r\n        android:inputType=\"textPassword\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/pwjoinCheckText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/pwjoinText\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:textSize=\"17dp\"\r\n        android:textStyle=\"bold\"\r\n        android:text=\"CheckPassWord\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/dpjoinEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@+id/pwjoinCheckEdit\"\r\n        android:layout_marginStart=\"18dp\"\r\n        android:layout_marginLeft=\"18dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/dpjoinText\"\r\n        android:privateImeOptions=\"defaultInputmode=korean\"\r\n        android:hint=\"\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/emailjoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/dpjoinText\"\r\n        android:layout_marginStart=\"48dp\"\r\n        android:layout_marginLeft=\"35dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:textSize=\"17dp\"\r\n        android:textStyle=\"bold\"\r\n        android:text=\"Email\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/emailjoinEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/dpjoinEdit\"\r\n        android:layout_marginStart=\"40dp\"\r\n        android:layout_marginLeft=\"37dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/emailjoinText\"\r\n        android:hint=\"\"\r\n        android:inputType=\"textEmailAddress\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/phonejoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/emailjoinText\"\r\n        android:layout_marginStart=\"18dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:textSize=\"17dp\"\r\n        android:textStyle=\"bold\"\r\n        android:text=\"PhoneNumber\" />\r\n\r\n    <EditText\r\n        android:id=\"@+id/phonejoinEdit\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/emailjoinEdit\"\r\n        android:layout_marginStart=\"10dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:layout_marginTop=\"10dp\"\r\n        android:layout_marginEnd=\"20dp\"\r\n        android:layout_marginRight=\"20dp\"\r\n        android:layout_toRightOf=\"@id/phonejoinText\"\r\n        android:hint=\"\"/>\r\n\r\n    <TextView\r\n        android:id=\"@+id/genderJoinText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/phonejoinText\"\r\n        android:layout_marginStart=\"43dp\"\r\n        android:layout_marginLeft=\"31dp\"\r\n        android:layout_marginTop=\"35dp\"\r\n        android:textSize=\"17dp\"\r\n        android:textStyle=\"bold\"\r\n        android:text=\"Gender\" />\r\n\r\n    <RadioGroup\r\n        android:id=\"@+id/RadioGroup\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/phonejoinEdit\"\r\n        android:layout_marginStart=\"28dp\"\r\n        android:layout_marginLeft=\"28dp\"\r\n        android:layout_marginTop=\"30dp\"\r\n        android:layout_toRightOf=\"@id/genderJoinText\"\r\n        android:orientation=\"horizontal\">\r\n\r\n        <RadioButton\r\n            android:id=\"@+id/maleButton\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:text=\"Male\" />\r\n\r\n        <RadioButton\r\n            android:id=\"@+id/femaleButton\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"10dp\"\r\n            android:layout_marginLeft=\"10dp\"\r\n            android:text=\"Female\" />\r\n    </RadioGroup>\r\n\r\n    <CheckBox\r\n        android:id=\"@+id/check\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/genderJoinText\"\r\n        android:layout_alignParentBottom=\"false\"\r\n        android:layout_marginStart=\"220dp\"\r\n        android:layout_marginLeft=\"200dp\"\r\n        android:layout_marginTop=\"30dp\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/checkText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_below=\"@id/genderJoinText\"\r\n        android:layout_alignParentBottom=\"false\"\r\n        android:layout_marginTop=\"37dp\"\r\n        android:layout_toRightOf=\"@id/check\"\r\n        android:textStyle=\"bold\"\r\n        android:text=\"개인 정보 보호 동의\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/alarmText\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_above=\"@id/joinButton\"\r\n        android:layout_centerHorizontal=\"true\"\r\n        android:layout_marginBottom=\"10dp\" />\r\n\r\n    <Button\r\n        android:id=\"@+id/joinButton\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"80dp\"\r\n        android:layout_alignParentBottom=\"true\"\r\n        android:layout_marginStart=\"10dp\"\r\n        android:layout_marginLeft=\"10dp\"\r\n        android:layout_marginEnd=\"10dp\"\r\n        android:layout_marginRight=\"10dp\"\r\n        android:layout_marginBottom=\"10dp\"\r\n        android:background=\"#4CAF50\"\r\n        android:text=\"Join\"\r\n        android:textColor=\"#FFFFFF\"\r\n        android:textSize=\"20dp\"\r\n        android:textStyle=\"bold\"/>\r\n\r\n</RelativeLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_join.xml	(revision a71e8a48b397d55f5aa4bf23f7a09926ec55e1f9)
++++ app/src/main/res/layout/activity_join.xml	(date 1605802694375)
+@@ -5,7 +5,6 @@
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     tools:context=".JoinActivity">
+-    
+ 
+     <include
+         layout="@layout/toolbar"
