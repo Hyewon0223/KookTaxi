@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_door"
+        android:icon="@drawable/door"
+        app:showAsAction="always"
+        android:title="logo" />
 
     <item
         android:id="@+id/item_master"
@@ -71,8 +77,8 @@
         android:title = "사용자">
         <menu>
             <item
-                android:id="@+id/item_out"
-                android:title="나가기"
+                android:id="@+id/item_pay"
+                android:title="입금 완료"
                 android:visible="false"></item>
         </menu>
     </item>

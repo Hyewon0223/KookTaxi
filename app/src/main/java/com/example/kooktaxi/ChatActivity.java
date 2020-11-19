@@ -26,13 +26,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
-    public int cnt = 0; //입금 확인한 사용자 넣는 용도
-
     public ListView lv_chating;
     private EditText et_send;
     public Button btn_send;
@@ -48,7 +47,12 @@ public class ChatActivity extends AppCompatActivity {
     public String chat_user;
     public String chat_message;
 
+    public int confirm_cnt = 0; // 마스터가 사용자 입금 완료 확인 하는 용도
+    public int pay_cnt = 0; // 사용자가 입금 완료 확인하는 용도
+
     public String master_mail;
+    public String[] user_list = {"", "", "",""};
+    public int cnt_user = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -114,6 +118,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 master_mail = snapshot.child("Email").getValue(String.class);
+                user_list[0] = master_mail;
             }
 
             @Override
@@ -170,46 +175,82 @@ public class ChatActivity extends AppCompatActivity {
             item_user.setVisible(true);
         }
 
-        MenuItem item_out = menu.findItem(R.id.item_out);
-
-        if(cnt == 3) {
-            item_out.setVisible(true);
-        }
-
-
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        //user의 이름을 메뉴에 띄우고 싶은데 ...
+
         switch(item.getItemId()) {
-            case R.id.item_matched: //매칭완료 아이템을 누르면
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false); //툴바의 뒤로가기 버튼을 안보이게 하고
+            case R.id.menu_door: // 문 눌렀을 때 뒤로가기 기능 , 데베에서 삭제되도록 해야함
+                if (confirm_cnt == cnt_user & pay_cnt == cnt_user){
+                    int idx = Arrays.asList(user_list).indexOf(str_user_mail);
+                    user_list[idx] = "";
+                    cnt_user--;
+
+                    for (int j=0; j<user_list.length; j++){
+                        System.out.println(user_list[j]);
+                    }
+
+                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                    intent.putExtra("mail", str_user_mail);
+                    intent.putExtra("station", station);
+                    startActivity(intent);
+                }
+                return true;
+            case R.id.item_matched:
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다
                 return true;
             case R.id.item_user1:
-                cnt++;
-//                addDepositChecked(item);
-//                if(deposit_user_list.size() == 3) {
-//                    getSupportActionBar().setDisplayHomeAsUpEnabled(true); //대신 뒤로가기 버튼 보이도록 함, 뒤로가기 버튼 누르면 데이터베이스에서 정보 삭제되도록 하고싶음
-//                    //findViewById(R.id.item_out).setVisible(true);  <-- menuItem 접근 방법을 모르겠음. 그래서 setVisible()이 오류남
-//                }
+                confirm_cnt++;
                 return true;
             case R.id.item_user2:
-                cnt++;
+                confirm_cnt++;
                 return true;
             case R.id.item_user3:
-                cnt++;
+                confirm_cnt++;
                 return true;
+//                강퇴하기
+            case R.id.item_user_1:
+                int user_idx = Arrays.asList(user_list).indexOf(str_user_mail);
+                if (user_idx == 1) {
+                    user_list[user_idx] = "";
+                    cnt_user--;
+
+                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                    intent.putExtra("mail", str_user_mail);
+                    intent.putExtra("station", station);
+                    startActivity(intent);
+                }
+            case R.id.item_user_2:
+                int user_idx2 = Arrays.asList(user_list).indexOf(str_user_mail);
+                if (user_idx2 == 2) {
+                    user_list[user_idx2] = "";
+                    cnt_user--;
+
+                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                    intent.putExtra("mail", str_user_mail);
+                    intent.putExtra("station", station);
+                    startActivity(intent);
+                }
+            case R.id.item_user_3:
+                int user_idx3 = Arrays.asList(user_list).indexOf(str_user_mail);
+                if (user_idx3 == 3) {
+                    user_list[user_idx3] = "";
+                    cnt_user--;
+
+                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                    intent.putExtra("mail", str_user_mail);
+                    intent.putExtra("station", station);
+                    startActivity(intent);
+                }
+            case R.id.item_pay:
+                pay_cnt++;
         }
         return true;
     }
-
-//    public void addDepositChecked(MenuItem item) { //각 사용자의 입금이 확인되면 리스트에 넣어주는 함수
-//        if(item.isChecked()) {
-//            deposit_user_list.add(item.getTitle().toString());
-//        }
-//    }
 
     // addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있으면,
     // 화면에 보여지고 있는 Listview의 값을 갱신함
@@ -219,6 +260,17 @@ public class ChatActivity extends AppCompatActivity {
         while(i.hasNext()) {
             chat_message = (String) ((DataSnapshot) i.next()).getValue();
             chat_user = (String) ((DataSnapshot) i.next()).getValue();
+
+            if (!Arrays.asList(user_list).contains(chat_user)) {
+                user_list[cnt_user] = chat_user;
+                cnt_user++;
+                for (int j=0; j<user_list.length; j++){
+                    System.out.println(user_list[j]);
+                }
+//                if (cnt_user == 3) {
+//                    //방에 들어올 수 없도록 해야함..
+//                }
+            }
 
             arrayAdapter.add(chat_user + " : " + chat_message);
         }
