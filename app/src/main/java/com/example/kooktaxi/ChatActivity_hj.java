@@ -28,11 +28,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ChatActivity_hj extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
     public static int cnt = 0; //입금 확인한 사용자 수 세는 용도
 
     public ListView lv_chating;
@@ -55,6 +56,8 @@ public class ChatActivity_hj extends AppCompatActivity {
     public String chat_message;
 
     public String master_mail;
+    public String[] user_list = {"", "", "",""};
+    public int cnt_user = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -65,6 +68,7 @@ public class ChatActivity_hj extends AppCompatActivity {
         setSupportActionBar(tb);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         et_send = (EditText) findViewById(R.id.et_send);
         lv_chating = (ListView) findViewById(R.id.lv_chating);
@@ -81,6 +85,22 @@ public class ChatActivity_hj extends AppCompatActivity {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(station).child(str_room_name); // 채팅 정보 읽어옴
 
         getSupportActionBar().setTitle(station +" "+ str_room_name + " 채팅방");
+
+        tb.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                if (Arrays.asList(user_list).contains(chat_user)) { //나영이가 추가한거
+                    int idx = Arrays.asList(user_list).indexOf(str_user_mail);
+                    user_list[idx] = "";
+                    cnt_user--;
+                }
+
+                Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                intent.putExtra("mail", str_user_mail);
+                intent.putExtra("station", station);
+                startActivity(intent);
+            }
+        });
 
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);
         lv_chating.setAdapter(arrayAdapter);
@@ -112,7 +132,7 @@ public class ChatActivity_hj extends AppCompatActivity {
         btn_out.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent it = new Intent(ChatActivity_hj.this, SearchActivity.class); // 나가면서 데베 기록도 삭제하면 좋겠음
+                Intent it = new Intent(ChatActivity.this, SearchActivity.class); // 나가면서 데베 기록도 삭제하면 좋겠음
                 startActivity(it);
             }
         });
