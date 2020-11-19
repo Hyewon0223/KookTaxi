@@ -4,6 +4,7 @@
  */
 package com.example.kooktaxi;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -11,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -35,6 +37,10 @@ public class ChatActivity extends AppCompatActivity {
     public ListView lv_chating;
     private EditText et_send;
     public Button btn_send;
+    public Button btn_out;
+    public CheckedTextView check_text1;
+    public CheckedTextView check_text2;
+    public CheckedTextView check_text3;
 
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> arr_room = new ArrayList<>();
@@ -54,6 +60,8 @@ public class ChatActivity extends AppCompatActivity {
     public String[] user_list = {"", "", "",""};
     public int cnt_user = 1;
 
+    public boolean matched = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -62,12 +70,14 @@ public class ChatActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar tb = findViewById(R.id.toolbar);
         setSupportActionBar(tb);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
         et_send = (EditText) findViewById(R.id.et_send);
         lv_chating = (ListView) findViewById(R.id.lv_chating);
         btn_send = (Button) findViewById(R.id.btn_send);
+        btn_out = (Button) findViewById(R.id.btn_out);
+
+        check_text1 = (CheckedTextView) findViewById(R.id.checkedTextView1);
+        check_text2 = (CheckedTextView) findViewById(R.id.checkedTextView2);
+        check_text3 = (CheckedTextView) findViewById(R.id.checkedTextView3);
 
         str_room_name = getIntent().getExtras().get("room_name").toString();
         str_user_mail = getIntent().getExtras().get("user_mail").toString();
@@ -77,22 +87,6 @@ public class ChatActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(station +" "+ str_room_name + " 채팅방");
 
-        tb.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v){
-                if (Arrays.asList(user_list).contains(chat_user)) {
-                    int idx = Arrays.asList(user_list).indexOf(str_user_mail);
-                    user_list[idx] = "";
-                    cnt_user--;
-                }
-
-                Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
-                intent.putExtra("mail", str_user_mail);
-                intent.putExtra("station", station);
-                startActivity(intent);
-            }
-        });
-
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);
         lv_chating.setAdapter(arrayAdapter);
         //리스트뷰가 갱신될 때 하단으로 자동 스크롤
@@ -100,7 +94,7 @@ public class ChatActivity extends AppCompatActivity {
 
         btn_send.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View view){
+            public void onClick(View view) {
                 //map을 사용해 name과 메시지를 가져오고, key에 값 요청
                 Map<String, Object> map = new HashMap<String, Object>();
                 key = reference.push().getKey();
@@ -120,11 +114,44 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        btn_out.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (matched == false) {
+                    if (Arrays.asList(user_list).contains(chat_user)) {
+                        int idx = Arrays.asList(user_list).indexOf(str_user_mail);
+                        user_list[idx] = "";
+                        cnt_user--;
+                    }
+
+                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                    intent.putExtra("mail", str_user_mail);
+                    intent.putExtra("station", station);
+                    startActivity(intent);
+                }
+                else {
+                    if (confirm_cnt == cnt_user & pay_cnt == cnt_user){
+                        int idx = Arrays.asList(user_list).indexOf(str_user_mail);
+                        user_list[idx] = "";
+                        cnt_user--;
+
+                        for (int j=0; j<user_list.length; j++){
+                            System.out.println(user_list[j]);
+                        }
+
+                        Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                        intent.putExtra("mail", str_user_mail);
+                        intent.putExtra("station", station);
+                        startActivity(intent);
+                    }
+                }
+            }
+        });
+
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 master_mail = snapshot.child("Email").getValue(String.class);
-                user_list[0] = master_mail;
             }
 
             @Override
@@ -166,13 +193,12 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu1, menu);
+        getMenuInflater().inflate(R.menu.menu1_hj, menu);
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
 
         MenuItem item_master = menu.findItem(R.id.item_master);
         MenuItem item_user = menu.findItem(R.id.item_user);
 
-//        방장의 기능이 사용자에게 안보여서 적용이 안되는 건가......
         if (str_user_mail.equals(master_mail)) {
             item_master.setVisible(true);
             item_user.setVisible(false);
@@ -185,41 +211,27 @@ public class ChatActivity extends AppCompatActivity {
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        //user의 이름을 메뉴에 띄우고 싶은데 ...
-
         switch(item.getItemId()) {
-            case R.id.menu_door: // 문 눌렀을 때 뒤로가기 기능 , 데베에서 삭제되도록 해야함
-                if (confirm_cnt == cnt_user & pay_cnt == cnt_user){
-                    int idx = Arrays.asList(user_list).indexOf(str_user_mail);
-                    user_list[idx] = "";
-                    cnt_user--;
-
-                    for (int j=0; j<user_list.length; j++){
-                        System.out.println(user_list[j]);
-                    }
-
-                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
-                    intent.putExtra("mail", str_user_mail);
-                    intent.putExtra("station", station);
-                    startActivity(intent);
-                }
-                return true;
             case R.id.item_matched:
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                matched = true;
                 //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다
                 return true;
             case R.id.item_user1:
                 confirm_cnt++;
+                check_text1.setChecked(true);
                 return true;
             case R.id.item_user2:
                 confirm_cnt++;
+                check_text2.setChecked(true);
                 return true;
             case R.id.item_user3:
                 confirm_cnt++;
+                check_text3.setChecked(true);
                 return true;
-//                강퇴하기
+            // 강퇴하기
             case R.id.item_user_1:
                 int user_idx = Arrays.asList(user_list).indexOf(str_user_mail);
                 if (user_idx == 1) {
@@ -256,7 +268,7 @@ public class ChatActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
                 return true;
-            case R.id.item_pay:
+            case R.id.item_deposit:
                 pay_cnt++;
                 return true;
         }

@@ -1,25 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
     <include
-        layout="@layout/toolbar"
-        android:id="@+id/toolbar" />
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar" />
 
     <ListView
         android:id="@+id/lv_chating"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="50dp">
-    </ListView>
+        android:layout_marginBottom="100dp"></ListView>
 
     <LinearLayout
-        android:layout_marginTop="-50dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="-100dp"
+        android:layout_marginBottom="50dp">
+
+        <CheckedTextView
+            android:id="@+id/checkedTextView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
+            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+            android:checked="false"
+            android:text="사용자1" />
+
+        <CheckedTextView
+            android:id="@+id/checkedTextView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+            android:checked="false"
+            android:text="사용자2" />
+
+        <CheckedTextView
+            android:id="@+id/checkedTextView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+            android:checked="false"
+            android:text="사용자3" />
+
+        <Button
+            android:id="@+id/btn_out"
+            android:layout_width="88dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="82dp"
+            android:layout_marginLeft="82dp"
+            android:background="#EC564B"
+            android:text="Out"
+            android:textColor="#FFFFFF"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-50dp"
         android:orientation="horizontal">
 
         <EditText
@@ -34,10 +78,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="#4CAF50"
+            android:text="send"
             android:textColor="#FFFFFF"
             android:textSize="18dp"
-            android:textStyle="bold"
-            android:text="send" />
+            android:textStyle="bold" />
 
     </LinearLayout>
 

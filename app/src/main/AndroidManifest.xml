@@ -32,8 +32,8 @@
             android:name=".SearchActivity"
             android:parentActivityName=".MainActivity"/>
         <activity
-            android:name=".ChatActivity"
-            android:parentActivityName=".SearchActivity"/>
+            android:name=".ChatActivity"/>
+<!--            android:parentActivityName=".SearchActivity"/>-->
 
     </application>
 
