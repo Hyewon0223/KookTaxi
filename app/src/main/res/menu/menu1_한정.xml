@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/item_master"
+        android:title = "방장">
+
+        <menu>
+            <item
+                android:id="@+id/item_deposit"
+                android:title = "입금확인">
+
+                <menu>
+
+                    <item
+                        android:id="@+id/item_user1"
+                        android:title="사용자1">
+                    </item>
+                    <item
+                        android:id="@+id/item_user2"
+                        android:title = "사용자2">
+                    </item>
+                    <item
+                        android:id="@+id/item_user3"
+                        android:title = "사용자3">
+                    </item>
+
+                </menu>
+
+            </item>
+
+            <item
+                android:id="@+id/item_kick"
+                android:title = "강퇴하기">
+
+                <menu>
+                    <group
+                        android:id = "@+id/checkable_group2"
+                        android:checkableBehavior = "all">
+                        <item
+                            android:id="@+id/item_user_1"
+                            android:checkable="true"
+                            android:title="사용자1">
+                        </item>
+                        <item
+                            android:id="@+id/item_user_2"
+                            android:title = "사용자2">
+                        </item>
+                        <item
+                            android:id="@+id/item_user_3"
+                            android:title = "사용자3">
+                        </item>
+                    </group>
+                </menu>
+
+            </item>
+            <item
+                android:id="@+id/item_matched"
+                android:title = "매칭완료">
+            </item>
+        </menu>
+
+    </item>
+
+    <item
+        android:id="@+id/item_user"
+        android:title = "사용자">
+<!--        <menu>
+            <item
+                android:id="@+id/item_out"
+                android:title="나가기"
+                android:visible="false"></item>
+        </menu>  -->
+    </item>
+</menu>
