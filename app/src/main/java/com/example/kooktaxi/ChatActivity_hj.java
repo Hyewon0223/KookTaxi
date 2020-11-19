@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity_hj extends AppCompatActivity {
     public static int cnt = 0; //입금 확인한 사용자 수 세는 용도
 
     public ListView lv_chating;
@@ -112,7 +112,7 @@ public class ChatActivity extends AppCompatActivity {
         btn_out.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent it = new Intent(ChatActivity.this, SearchActivity.class); // 나가면서 데베 기록도 삭제하면 좋겠음
+                Intent it = new Intent(ChatActivity_hj.this, SearchActivity.class); // 나가면서 데베 기록도 삭제하면 좋겠음
                 startActivity(it);
             }
         });

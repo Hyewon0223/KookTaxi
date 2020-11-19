@@ -53,7 +53,6 @@ public class ChatActivity extends AppCompatActivity {
     public String master_mail;
     public String[] user_list = {"", "", "",""};
     public int cnt_user = 1;
-    public boolean match = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -174,14 +173,14 @@ public class ChatActivity extends AppCompatActivity {
         MenuItem item_user = menu.findItem(R.id.item_user);
 
 //        방장의 기능이 사용자에게 안보여서 적용이 안되는 건가......
-        if (str_user_mail.equals(master_mail)) {
-            item_master.setVisible(true);
-            item_user.setVisible(false);
-        }
-        else {
-            item_master.setVisible(false);
-            item_user.setVisible(true);
-        }
+//        if (str_user_mail.equals(master_mail)) {
+//            item_master.setVisible(true);
+//            item_user.setVisible(false);
+//        }
+//        else {
+//            item_master.setVisible(false);
+//            item_user.setVisible(true);
+//        }
 
         return true;
     }
@@ -208,66 +207,71 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 return true;
             case R.id.item_matched:
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                match = true;
-                matched_func(match);
+                if (str_user_mail.equals(master_mail))
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다
                 return true;
             case R.id.item_user1:
-                confirm_cnt++;
+                if (str_user_mail.equals(master_mail))
+                    confirm_cnt++;
                 return true;
             case R.id.item_user2:
-                confirm_cnt++;
+                if (str_user_mail.equals(master_mail))
+                    confirm_cnt++;
                 return true;
             case R.id.item_user3:
-                confirm_cnt++;
+                if (str_user_mail.equals(master_mail))
+                    confirm_cnt++;
                 return true;
 //                강퇴하기
             case R.id.item_user_1:
-                int user_idx = Arrays.asList(user_list).indexOf(str_user_mail);
-                if (user_idx == 1) {
-                    user_list[user_idx] = "";
-                    cnt_user--;
+                if (str_user_mail.equals(master_mail)){
+                    int user_idx = Arrays.asList(user_list).indexOf(str_user_mail);
+                    if (user_idx == 1) {
+                        user_list[user_idx] = "";
+                        cnt_user--;
 
-                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
-                    intent.putExtra("mail", str_user_mail);
-                    intent.putExtra("station", station);
-                    startActivity(intent);
+                        Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                        intent.putExtra("mail", str_user_mail);
+                        intent.putExtra("station", station);
+                        startActivity(intent);
+                    }
                 }
+                return true;
             case R.id.item_user_2:
-                int user_idx2 = Arrays.asList(user_list).indexOf(str_user_mail);
-                if (user_idx2 == 2) {
-                    user_list[user_idx2] = "";
-                    cnt_user--;
+                if (str_user_mail.equals(master_mail)) {
+                    int user_idx2 = Arrays.asList(user_list).indexOf(str_user_mail);
+                    if (user_idx2 == 2) {
+                        user_list[user_idx2] = "";
+                        cnt_user--;
 
-                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
-                    intent.putExtra("mail", str_user_mail);
-                    intent.putExtra("station", station);
-                    startActivity(intent);
+                        Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                        intent.putExtra("mail", str_user_mail);
+                        intent.putExtra("station", station);
+                        startActivity(intent);
+                    }
                 }
+                return true;
             case R.id.item_user_3:
-                int user_idx3 = Arrays.asList(user_list).indexOf(str_user_mail);
-                if (user_idx3 == 3) {
-                    user_list[user_idx3] = "";
-                    cnt_user--;
+                if (str_user_mail.equals(master_mail)) {
+                    int user_idx3 = Arrays.asList(user_list).indexOf(str_user_mail);
+                    if (user_idx3 == 3) {
+                        user_list[user_idx3] = "";
+                        cnt_user--;
 
-                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
-                    intent.putExtra("mail", str_user_mail);
-                    intent.putExtra("station", station);
-                    startActivity(intent);
+                        Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                        intent.putExtra("mail", str_user_mail);
+                        intent.putExtra("station", station);
+                        startActivity(intent);
+                    }
                 }
+                return true;
             case R.id.item_pay:
-                pay_cnt++;
+                if (!str_user_mail.equals(master_mail))
+                    pay_cnt++;
+                return true;
         }
         return true;
-    }
-
-    public void matched_func(boolean matched){
-        if (match == true) {
-            if (Arrays.asList(user_list).contains(str_user_mail)){
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            }
-        }
     }
 
     // addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있으면,
