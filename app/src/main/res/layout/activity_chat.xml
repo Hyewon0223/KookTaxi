@@ -18,7 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="-100dp"
-        android:layout_marginBottom="50dp">
+        android:layout_marginBottom="50dp"
+        android:gravity="right">
 
         <CheckedTextView
             android:id="@+id/checkedTextView1"
@@ -42,6 +43,8 @@
             android:id="@+id/checkedTextView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="70dp"
+            android:layout_marginRight="70dp"
             android:checkMark="?android:attr/listChoiceIndicatorMultiple"
             android:checked="false"
             android:text="사용자3" />
@@ -50,8 +53,7 @@
             android:id="@+id/btn_out"
             android:layout_width="88dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="82dp"
-            android:layout_marginLeft="82dp"
+            android:layout_gravity="end"
             android:background="#EC564B"
             android:text="Out"
             android:textColor="#FFFFFF"

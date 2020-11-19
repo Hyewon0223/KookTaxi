@@ -4,9 +4,10 @@
  */
 package com.example.kooktaxi;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,6 +29,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +48,7 @@ public class ChatActivity extends AppCompatActivity {
     public CheckedTextView check_text1;
     public CheckedTextView check_text2;
     public CheckedTextView check_text3;
+    public String socketData = "";
 
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> arr_room = new ArrayList<>();
@@ -57,10 +65,12 @@ public class ChatActivity extends AppCompatActivity {
     public int pay_cnt = 0; // 사용자가 입금 완료 확인하는 용도
 
     public String master_mail;
-    public String[] user_list = {"", "", "","","","",""};
+    public String[] user_list = {"", "", "","","","","","",""};
     public int cnt_user = 1;
 
     public boolean matched = false;
+
+    Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -135,9 +145,9 @@ public class ChatActivity extends AppCompatActivity {
                         user_list[idx] = "";
                         cnt_user--;
 
-//                        for (int j=0; j<user_list.length; j++){
-//                            System.out.println(user_list[j]);
-//                        }
+                        for (int j=0; j<user_list.length; j++){
+                            System.out.println(user_list[j]);
+                        }
 
                         Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
                         intent.putExtra("mail", str_user_mail);
@@ -152,7 +162,6 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 master_mail = snapshot.child("Email").getValue(String.class);
-                user_list[0] = master_mail;
             }
 
             @Override
@@ -194,7 +203,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu1, menu);
+        getMenuInflater().inflate(R.menu.menu1_hj, menu);
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
 
         MenuItem item_master = menu.findItem(R.id.item_master);
@@ -207,10 +216,6 @@ public class ChatActivity extends AppCompatActivity {
         else {
             item_master.setVisible(false);
             item_user.setVisible(true);
-
-            check_text1.setVisibility(View.INVISIBLE);
-            check_text2.setVisibility(View.INVISIBLE);
-            check_text3.setVisibility(View.INVISIBLE);
         }
 
         return true;
@@ -221,8 +226,22 @@ public class ChatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
             case R.id.item_matched:
-                matched = true;
+
                 //구현 못함 --> activity_search.xml에서 해당 방의 제목을 invisible하게 한다
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        startServer();
+                        send("매칭완료");
+                    }
+                }).start();
+
+                System.out.println(socketData);
+
+                if (socketData.equals("매칭완료")){
+                    btn_out.setVisibility(View.INVISIBLE);
+                }
+
                 return true;
             case R.id.item_user1:
                 confirm_cnt++;
@@ -292,9 +311,9 @@ public class ChatActivity extends AppCompatActivity {
             if (!Arrays.asList(user_list).contains(chat_user)) {
                 user_list[cnt_user] = chat_user;
                 cnt_user++;
-//                for (int j=0; j<user_list.length; j++){
-//                    System.out.println(user_list[j]);
-//                }
+                for (int j=0; j<user_list.length; j++){
+                    System.out.println(user_list[j]);
+                }
 //                if (cnt_user == 3) {
 //                    //방에 들어올 수 없도록 해야함..
 //                }
@@ -305,4 +324,79 @@ public class ChatActivity extends AppCompatActivity {
 
         arrayAdapter.notifyDataSetChanged();
     }
+
+    public void send(String data) {
+        try {
+            int portNumber = 5001;
+            Socket sock = new Socket("localhost", portNumber);
+            printClientLog("소켓 연결함.");
+
+            ObjectOutputStream outstream = new ObjectOutputStream(sock.getOutputStream());
+            outstream.writeObject(data);
+            outstream.flush();
+            printClientLog("데이터 전송함.");
+
+            ObjectInputStream instream = new ObjectInputStream(sock.getInputStream());
+            printClientLog("서버로부터 받음 : " + instream.readObject());
+
+            socketData = data;
+            sock.close();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void startServer() {
+        try {
+            int portNumber = 5001;
+
+            ServerSocket server = new ServerSocket(portNumber);
+            printServerLog("서버 시작함 : " + portNumber);
+
+            while(true) {
+                Socket sock = server.accept();
+                InetAddress clientHost = sock.getLocalAddress();
+                int clientPort = sock.getPort();
+                printServerLog("클라이언트 연결됨 : " + clientHost + " : " + clientPort);
+
+                ObjectInputStream instream = new ObjectInputStream(sock.getInputStream());
+                Object obj = instream.readObject();
+                printServerLog("데이터 받음 : " + obj);
+
+                ObjectOutputStream outstream = new ObjectOutputStream(sock.getOutputStream());
+                outstream.writeObject(obj + " from Server.");
+                outstream.flush();
+                printServerLog("데이터 보냄.");
+
+                sock.close();
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void printClientLog(final String data) {
+        Log.d("ChatActivity", data);
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ChatActivity.this, data, Toast.LENGTH_LONG).show();
+            }
+        });
+
+    }
+
+    public void printServerLog(final String data) {
+        Log.d("MainActivity", data);
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ChatActivity.this, data, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 }
+
+
