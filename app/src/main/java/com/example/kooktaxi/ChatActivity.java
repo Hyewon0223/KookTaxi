@@ -57,7 +57,7 @@ public class ChatActivity extends AppCompatActivity {
     public int pay_cnt = 0; // 사용자가 입금 완료 확인하는 용도
 
     public String master_mail;
-    public String[] user_list = {"", "", "",""};
+    public String[] user_list = {"", "", "","","","",""};
     public int cnt_user = 1;
 
     public boolean matched = false;
@@ -135,9 +135,9 @@ public class ChatActivity extends AppCompatActivity {
                         user_list[idx] = "";
                         cnt_user--;
 
-                        for (int j=0; j<user_list.length; j++){
-                            System.out.println(user_list[j]);
-                        }
+//                        for (int j=0; j<user_list.length; j++){
+//                            System.out.println(user_list[j]);
+//                        }
 
                         Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
                         intent.putExtra("mail", str_user_mail);
@@ -152,6 +152,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 master_mail = snapshot.child("Email").getValue(String.class);
+                user_list[0] = master_mail;
             }
 
             @Override
@@ -193,7 +194,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu1_hj, menu);
+        getMenuInflater().inflate(R.menu.menu1, menu);
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
 
         MenuItem item_master = menu.findItem(R.id.item_master);
@@ -206,6 +207,10 @@ public class ChatActivity extends AppCompatActivity {
         else {
             item_master.setVisible(false);
             item_user.setVisible(true);
+
+            check_text1.setVisibility(View.INVISIBLE);
+            check_text2.setVisibility(View.INVISIBLE);
+            check_text3.setVisibility(View.INVISIBLE);
         }
 
         return true;
@@ -287,9 +292,9 @@ public class ChatActivity extends AppCompatActivity {
             if (!Arrays.asList(user_list).contains(chat_user)) {
                 user_list[cnt_user] = chat_user;
                 cnt_user++;
-                for (int j=0; j<user_list.length; j++){
-                    System.out.println(user_list[j]);
-                }
+//                for (int j=0; j<user_list.length; j++){
+//                    System.out.println(user_list[j]);
+//                }
 //                if (cnt_user == 3) {
 //                    //방에 들어올 수 없도록 해야함..
 //                }

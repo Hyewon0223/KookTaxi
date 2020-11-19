@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <item
-        android:id="@+id/menu_door"
-        android:icon="@drawable/door"
-        app:showAsAction="always"
-        android:title="logo" />
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/item_master"
@@ -14,16 +8,13 @@
 
         <menu>
             <item
-                android:id="@+id/item_deposit"
+                android:id="@+id/item_deposit_check"
                 android:title = "입금확인">
 
                 <menu>
-                <group
-                    android:id = "@+id/checkable_group"
-                    android:checkableBehavior = "all">
+
                     <item
                         android:id="@+id/item_user1"
-                        android:checkable="true"
                         android:title="사용자1">
                     </item>
                     <item
@@ -34,7 +25,7 @@
                         android:id="@+id/item_user3"
                         android:title = "사용자3">
                     </item>
-                </group>
+
                 </menu>
 
             </item>
@@ -77,9 +68,9 @@
         android:title = "사용자">
         <menu>
             <item
-                android:id="@+id/item_pay"
-                android:title="입금 완료"
-                android:visible="false"></item>
+                android:id="@+id/item_deposit"
+                android:title="입금하기">
+            </item>
         </menu>
     </item>
 </menu>
