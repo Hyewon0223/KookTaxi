@@ -96,6 +96,7 @@ public class ChatActivity extends AppCompatActivity {
 
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr_room);
         lv_chating.setAdapter(arrayAdapter);
+
         //리스트뷰가 갱신될 때 하단으로 자동 스크롤
         lv_chating.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
@@ -103,7 +104,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //map을 사용해 name과 메시지를 가져오고, key에 값 요청
-                Map<String, Object> map = new HashMap<String, Object>();
+//                Map<String, Object> map = new HashMap<String, Object>();
                 key = reference.push().getKey();
 
                 DatabaseReference root = reference.child(key);
@@ -113,6 +114,7 @@ public class ChatActivity extends AppCompatActivity {
                 objectMap.put("name", str_user_mail);
                 objectMap.put("message", et_send.getText().toString());
 
+                //updateChildren을 호출하여 database 업데이트(name, message)
                 root.updateChildren(objectMap);
 
                 et_send.setText("");
@@ -123,17 +125,17 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(station).child(str_room_name);
-                if (matched == false) {
+                if (matched == false) { // 'OUT' 버튼 활성화 되어 있을 때
                     if (Arrays.asList(user_list).contains(chat_user)) {
                         int idx = Arrays.asList(user_list).indexOf(str_user_mail);
-                        user_list[idx] = "";
-                        cnt_user--;
+                        user_list[idx] = "";  // 사용자의 이메일 저장하는 배열에서 'OUT'버튼 누른 사용자의 이메일 지우기
+                        cnt_user--;  // 현재 채팅방에 있는 사용자의 수 1 감소
                     }
 
                     String cnt = Integer.toString(cnt_user);
-                    myRef.child("ChatInfo").child(station).child(str_room_name).child("COUNT").setValue(cnt);
+                    myRef.child("ChatInfo").child(station).child(str_room_name).child("COUNT").setValue(cnt);  // 데이터베이스에 업데이트
 
-                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);
+                    Intent intent = new Intent(ChatActivity.this, SearchActivity.class);  // 화면전환하기
                     intent.putExtra("mail", str_user_mail);
                     intent.putExtra("station", station);
                     startActivity(intent);
@@ -156,6 +158,7 @@ public class ChatActivity extends AppCompatActivity {
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                //방장의 메일(master_mail)과 현재 채팅방의 사용자의 수(user_cnt) 가져오기
                 master_mail = snapshot.child("Email").getValue(String.class);
                 user_list[0] = master_mail;
                 user_cnt = snapshot.child("COUNT").getValue(String.class);
@@ -196,7 +199,7 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    //메뉴 자바 코드
+    //메뉴바
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -206,11 +209,11 @@ public class ChatActivity extends AppCompatActivity {
         MenuItem item_master = menu.findItem(R.id.item_master);
         MenuItem item_user = menu.findItem(R.id.item_user);
 
-        if (str_user_mail.equals(master_mail)) {
-            item_master.setVisible(true);
+        if (str_user_mail.equals(master_mail)) {  // master의 메일 주소와 사용자의 메일 주소가 같을 경우 방장이므로
+            item_master.setVisible(true); // 방장의 item만 메뉴바에서 볼 수 있음
             item_user.setVisible(false);
         }
-        else {
+        else { // 사용자
             item_master.setVisible(false);
             item_user.setVisible(true);
 
@@ -228,7 +231,8 @@ public class ChatActivity extends AppCompatActivity {
         switch(item.getItemId()) {
             case R.id.item_matched:
                 int num = Integer.parseInt(user_cnt);
-                if(num == 4){
+                if(num == 4){ // 채팅방 전체 인원수는 4명으로 제한
+                    // 채팅방의 인원수가 4명이고 방장이 매치버튼을 누르면 'OUT'버튼 invisible
                     btn_out.setVisibility(View.INVISIBLE);
                 }
                 matched = true;
@@ -313,11 +317,11 @@ public class ChatActivity extends AppCompatActivity {
         arrayAdapter.notifyDataSetChanged();
     }
 
-    public Map<String, Object> toMap(String cnt) {
-        HashMap<String, Object> result = new HashMap<>();
-
-        result.put("cnt", cnt);
-
-        return result;
-    }
+//    public Map<String, Object> toMap(String cnt) {
+//        HashMap<String, Object> result = new HashMap<>();
+//
+//        result.put("cnt", cnt);
+//
+//        return result;
+//    }
 }

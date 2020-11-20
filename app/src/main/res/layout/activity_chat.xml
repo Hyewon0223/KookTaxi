@@ -12,7 +12,7 @@
         android:id="@+id/lv_chating"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="100dp"></ListView>
+        android:layout_marginBottom="100dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -60,7 +60,6 @@
             android:textSize="18dp"
             android:textStyle="bold" />
     </LinearLayout>
-
 
     <LinearLayout
         android:layout_width="match_parent"

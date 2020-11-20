@@ -5,35 +5,25 @@
     <item
         android:id="@+id/item_master"
         android:title = "방장">
-
         <menu>
             <item
                 android:id="@+id/item_deposit_check"
                 android:title = "입금확인">
-
                 <menu>
-
                     <item
                         android:id="@+id/item_user1"
-                        android:title="사용자1">
-                    </item>
+                        android:title="사용자1" />
                     <item
                         android:id="@+id/item_user2"
-                        android:title = "사용자2">
-                    </item>
+                        android:title = "사용자2" />
                     <item
                         android:id="@+id/item_user3"
-                        android:title = "사용자3">
-                    </item>
-
+                        android:title = "사용자3" />
                 </menu>
-
             </item>
-
             <item
                 android:id="@+id/item_kick"
                 android:title = "강퇴하기">
-
                 <menu>
                     <group
                         android:id = "@+id/checkable_group2"
@@ -41,26 +31,20 @@
                         <item
                             android:id="@+id/item_user_1"
                             android:checkable="true"
-                            android:title="사용자1">
-                        </item>
+                            android:title="사용자1" />
                         <item
                             android:id="@+id/item_user_2"
-                            android:title = "사용자2">
-                        </item>
+                            android:title = "사용자2" />
                         <item
                             android:id="@+id/item_user_3"
-                            android:title = "사용자3">
-                        </item>
+                            android:title = "사용자3" />
                     </group>
                 </menu>
-
             </item>
             <item
                 android:id="@+id/item_matched"
-                android:title = "매칭완료">
-            </item>
+                android:title = "매칭완료" />
         </menu>
-
     </item>
 
     <item

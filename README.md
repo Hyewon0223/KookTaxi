@@ -2,6 +2,7 @@
 ### 국민대 소프트웨어학부 
 ## 20191604백연선 / 20191650이한정 / 20191670조나영 / 20191686최혜원
 ### https://github.com/Hyewon0223/KookTaxi
+#### (20191604 백연선의 README 파일)
 ---
 ### 설명
 <div>
@@ -13,7 +14,7 @@
 </div>
 
 - 목적지가 국민대인 사람들을 모아 택시를 함께 탈 수 있도록 하는 앱입니다.
-- 동승하고 싶은 사람의 성별 여부, 인원수, 출발 지점(길음역, 광화문역, 홍대입구역, 동대문역사문화공원역) 등에 따라 사람들을 매칭해준다.
+- 출발 지점(길음역, 광화문역, 홍대입구역, 동대문역사문화공원역)과 시간에 따라 사람들을 매칭해준다.
 ---
 ### 개발 환경
 - Window OS
@@ -39,7 +40,7 @@
 ### 코드 관련 설명
 #### manifests
 ##### AndroidManifest.xml
-- 사용자의 위치 정보 접근을 위한 액세스 권한 
+- 사용자의 위치 정보 접근을 위한 액세스 권한
 ~~~xml
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -156,7 +157,7 @@ public void setDefaultLocation() {
     markerOptions.draggable(true);
     markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
     currentMarker = mMap.addMarker(markerOptions);
-    
+
     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15);
     mMap.moveCamera(cameraUpdate);
 }
@@ -203,4 +204,131 @@ tb.setNavigationOnClickListener(new View.OnClickListener() {
 - 채팅방의 대화가 추가되어 ListView가 갱신될 때 하단으로 자동 스크롤
 ~~~java
 lv_chating.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+~~~
+- 'SEND' 버튼 클릭시 key에 값 요청하고 updateChildren을 호출하여 database 업데이트(name, message)
+~~~java
+btn_send.setOnClickListener(new View.OnClickListener(){
+    @Override
+    public void onClick(View view) {
+        key = reference.push().getKey();
+        DatabaseReference root = reference.child(key);
+
+        Map<String, Object> objectMap = new HashMap<String, Object>();
+        objectMap.put("name", str_user_mail);
+        objectMap.put("message", et_send.getText().toString());
+
+        root.updateChildren(objectMap);
+
+        et_send.setText("");
+    }
+});
+~~~
+- 'OUT' 버튼 활성화 되어 있을 때 클릭시 사용자의 메일은 배열에서 삭제 후 데이터베이스의 'COUNT'값 1 감소하고 SearchActivity화면으로 돌아가기
+~~~java
+btn_out.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(station).child(str_room_name);
+        if (matched == false) { // 활성화 되어 있을 때
+            if (Arrays.asList(user_list).contains(chat_user)) {
+                int idx = Arrays.asList(user_list).indexOf(str_user_mail);
+                user_list[idx] = ""; // 사용자의 이메일 저장하는 배열에서 'OUT'버튼 누른 사용자의 이메일 지우기
+                cnt_user--; // 현재 채팅방에 있는 사용자의 수 1 감소
+            }
+
+            String cnt = Integer.toString(cnt_user);
+            myRef.child("ChatInfo").child(station).child(str_room_name).child("COUNT").setValue(cnt); // 데이터베이스에 업데이트
+
+            Intent intent = new Intent(ChatActivity.this, SearchActivity.class); // 화면전환하기
+            intent.putExtra("mail", str_user_mail);
+            intent.putExtra("station", station);
+            startActivity(intent);
+        }
+        ...
+    }
+});
+~~~
+- 방장의 메일 및 현재 채팅방의 사용자의 수 받아오기(방장과 사용자의 메뉴바를 다르게 구현할 때 사용하기 위해 채팅창이 생성되었을 때 방장의 메일값을 같이 데이터베이스에 저장함)
+~~~java
+reference.addValueEventListener(new ValueEventListener() {
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+        master_mail = snapshot.child("Email").getValue(String.class);
+        user_list[0] = master_mail;
+
+        user_cnt = snapshot.child("COUNT").getValue(String.class);
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+    }
+});
+~~~
+- 메뉴바 만들기
+~~~java
+@Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    super.onCreateOptionsMenu(menu);
+    getMenuInflater().inflate(R.menu.menu1, menu);
+    getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+
+    MenuItem item_master = menu.findItem(R.id.item_master);
+    MenuItem item_user = menu.findItem(R.id.item_user);
+
+    if (str_user_mail.equals(master_mail)) { // master의 메일 주소와 사용자의 메일 주소가 같을 경우 방장이므로
+        item_master.setVisible(true); // 방장의 item만 메뉴바에서 볼 수 있음
+        item_user.setVisible(false);
+    }
+    else {
+        item_master.setVisible(false);
+        item_user.setVisible(true);
+
+        check_text1.setVisibility(View.INVISIBLE);
+        check_text2.setVisibility(View.INVISIBLE);
+        check_text3.setVisibility(View.INVISIBLE);
+    }
+
+    return true;
+}
+~~~
+- id값이 'item_matched'인 메뉴바의 item을 클릭하였을 때 전체 인원수(4명 제한)와 동일하면 'OUT'버튼 숨기기
+~~~java
+@Override
+public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    switch(item.getItemId()) {
+        case R.id.item_matched:
+            int num = Integer.parseInt(user_cnt);
+            if(num == 4){
+                btn_out.setVisibility(View.INVISIBLE);
+            }
+            matched = true;
+            return true;
+        ...
+    }
+    return true;
+}
+~~~
+- addChildEventListener를 통해 실제 데이터베이스에 변경된 값이 있을 때 채팅내용을 보여주는 ListView의 값 업데이트하기
+~~~java
+private void chatConversation(DataSnapshot dataSnapshot) {
+    Iterator i = dataSnapshot.getChildren().iterator();
+    DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference().child("ChatInfo").child(station).child(str_room_name);
+
+    while(i.hasNext()) {
+        chat_message = (String) ((DataSnapshot) i.next()).getValue();
+        chat_user = (String) ((DataSnapshot) i.next()).getValue();
+
+        if (!Arrays.asList(user_list).contains(chat_user)) {
+            user_list[cnt_user] = chat_user;
+            cnt_user++;
+
+            String cnt = Integer.toString(cnt_user);
+            myRef.child("ChatInfo").child(station).child(str_room_name).child("COUNT").setValue(cnt);
+        }
+
+        arrayAdapter.add(chat_user + " : " + chat_message);
+    }
+
+    arrayAdapter.notifyDataSetChanged();
+}
 ~~~

@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
                 String markerTitle = getCurrentAddress(currentPosition);
                 String markerSnippet = "위도:" + String.valueOf(location.getLatitude()) + " 경도:" + String.valueOf(location.getLongitude());
-                //setCurrentLocation(location, markerTitle, markerSnippet);
+                setCurrentLocation(location, markerTitle, markerSnippet);
                 mCurrentLocatiion = location;
             }
         }
