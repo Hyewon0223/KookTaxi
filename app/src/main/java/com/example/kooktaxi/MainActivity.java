@@ -142,10 +142,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
         //좌표 객체 생성(우선 4개의 역 좌표 객체를 생성함)
-        LatLng Gwanghwamun = new LatLng(37.5707456,126.973708); //(위도, 경도)
-        LatLng Hongdae = new LatLng(37.557527,126.9222782);
-        LatLng Gileum = new LatLng(37.6086541,127.0136683);
-        LatLng DDP = new LatLng(37.5644,127.0055713);
+        LatLng Gwanghwamun = new LatLng(37.571581, 126.976561); //(위도, 경도)
+        LatLng Hongdae = new LatLng(37.556754, 126.923635);
+        LatLng Gileum = new LatLng(37.603395, 127.025051);
+        LatLng DDP = new LatLng(37.565159, 127.007923);
 
         MarkerOptions[] markerOptions = new MarkerOptions[4];  //마커옵션 배열 생성. 각 마커의 위치와 타이틀을 설정해줌.
         markerOptions[0] = new MarkerOptions()
