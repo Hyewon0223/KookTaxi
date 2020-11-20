@@ -2,30 +2,30 @@
 
 #### 7조 팀원 소개
 
-<img align="left" width="130" height="130" src="img/연선.jpeg"></img>
+<img align="left" width="100" height="100" src="img/연선.jpg"></img>
 ```
-19학번 백연선
+20191604 백연선
 
 Role : MainActivity & ChatActivity & Menu
 GitHub : https://github.com/BaekYeonSun
 ```
 
-<img align="left" width="130" height="130" src="img/한정.jpeg"></img>```
+<img align="left" width="100" height="100" src="img/한정.jpg"></img>
 ```
-19학번 이한정
+20191650 이한정
 
 Role : MainActivity & ChatActivity & Menu
 GitHub : https://github.com/leehanjeong
 ```
 
-<img align="left" width="130" height="130" src="img/나영.jpeg"></img>
+<img align="left" width="100" height="100" src="img/나영.jpg"></img>
 ```
-19학번 조나영
+20191670 조나영
 Role : LogInActivity & JoinActivity & Menu
 GitHub : https://github.com/NaYoung2253
 ```
 
-<img align="left" width="130" height="130" src="img/혜원.jpeg"></img>
+<img align="left" width="100" height="100" src="img/혜원.jpg"></img>
 ```
 20191686 최혜원
 Role : JoinActivity & SearchActivity & Menu
