@@ -1,42 +1,35 @@
 # [모바일프로그래밍01] KOOKTAXI
 
-## 7조 팀원 소개
+#### 7조 팀원 소개
 
 <img align="left" width="160" height="160" src="img/연선.jpeg"></img>
 ```
-
 19학번 백연선
 
 Role : MainActivity & ChatActivity & Menu
 GitHub : https://github.com/BaekYeonSun
-
 ```
 
 <img align="left" width="160" height="160" src="img/한정.jpeg"></img>```
-
+```
 19학번 이한정
 
 Role : MainActivity & ChatActivity & Menu
 GitHub : https://github.com/leehanjeong
-
 ```
 
 <img align="left" width="160" height="160" src="img/나영.jpeg"></img>
 ```
-
 19학번 조나영
 Role : LogInActivity & JoinActivity & Menu
 GitHub : https://github.com/NaYoung2253
-
 ```
 
 <img align="left" width="160" height="160" src="img/혜원.jpeg"></img>
 ```
-
 20191686 최혜원
 Role : JoinActivity & SearchActivity & Menu
 GitHub : https://github.com/Hyewon0223
-
 ```
 ---
 ## 설명
