@@ -5,7 +5,6 @@
 <img align="left" width="100" height="100" src="img/연선.jpg"></img>
 ```
 20191604 백연선
-
 Role : MainActivity & ChatActivity & Menu
 GitHub : https://github.com/BaekYeonSun
 ```
@@ -13,7 +12,6 @@ GitHub : https://github.com/BaekYeonSun
 <img align="left" width="100" height="100" src="img/한정.jpg"></img>
 ```
 20191650 이한정
-
 Role : MainActivity & ChatActivity & Menu
 GitHub : https://github.com/leehanjeong
 ```
