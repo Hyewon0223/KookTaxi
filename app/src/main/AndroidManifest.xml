@@ -33,7 +33,6 @@
             android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".ChatActivity"/>
-<!--            android:parentActivityName=".SearchActivity"/>-->
 
     </application>
 

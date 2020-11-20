@@ -52,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
 
         TextView alarm = (TextView) findViewById(R.id.alarmTextView);
 
+        // 파이어베이스
         firebaseAuth = FirebaseAuth.getInstance();
 
         joinButton.setOnClickListener(new View.OnClickListener() {
@@ -77,13 +78,13 @@ public class LoginActivity extends AppCompatActivity {
                 for (int i = 0; i < info.length; i++)
                     if (info[i].equals("")) edits[i].setHint(fill[i] + "was not filled.");
 
+                // 모든 조건 충족 시 로그인
                 if (mail.length() != 0 && pw.length() != 0) {
                     firebaseAuth.signInWithEmailAndPassword(mail,pw)
                             .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()){
-//                                        System.out.println("성공");
                                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                         intent.putExtra("mail", mail);
                                         startActivity(intent);

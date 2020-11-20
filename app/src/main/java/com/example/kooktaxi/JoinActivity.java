@@ -113,10 +113,12 @@ public class JoinActivity extends AppCompatActivity {
                 if (gender.equals("")) alarmtext.setText("Please check the gender.");
                 if (Check.isChecked() && !gender.equals("")) alarmtext.setText("");
 
-                // 모든 조건 충족시
-                if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0 && pwCheck.length() != 0 && gender != "" && Check.isChecked()) {
+                // 모든 조건 충족시 회원가입
+                if (Id.length() != 0 && pw.length() != 0 && dp.length() != 0 && mail.length() != 0 && phone.length() != 0
+                        && pwCheck.length() != 0 && gender != "" && Check.isChecked()) {
                     if (mailCheck[1].equals("kookmin.ac.kr") && pw.equals(pwCheck)) {
-                        firebaseAuth.createUserWithEmailAndPassword(mail, pw).addOnCompleteListener(JoinActivity.this, new OnCompleteListener<AuthResult>() {
+                        firebaseAuth.createUserWithEmailAndPassword(mail, pw).addOnCompleteListener(JoinActivity.this,
+                                new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 // 아이디(학번)가 중복되지 않는다면
@@ -148,6 +150,7 @@ public class JoinActivity extends AppCompatActivity {
         return true;
     }
 
+    // database에 보낼 때 map 형식으로 보냄
     public Map<String, Object> toMap(String pw, String dp, String mail, String phone, String gender) {
         HashMap<String, Object> result = new HashMap<>();
 
